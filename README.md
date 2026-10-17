@@ -82,8 +82,10 @@ REPORT.md         findings
 
 ## Tests
 
-`pytest` runs 70 tests in about 40 seconds, with no network access. CI
-(`.github/workflows/ci.yml`) runs ruff and pytest on Python 3.11 and 3.12.
+`pytest` runs 72 tests in under 30 seconds, with no network access. CI
+(`.github/workflows/ci.yml`) follows the quant-signal-pipeline setup: on every push and
+pull request to `main` it installs the package and runs `pytest tests/ -v`. It also runs
+ruff, on Python 3.11, 3.12 and 3.13.
 
 | Test file | What it proves |
 |---|---|

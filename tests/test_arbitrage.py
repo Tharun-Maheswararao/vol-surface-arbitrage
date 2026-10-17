@@ -123,3 +123,13 @@ def test_summary_counts():
     s = summarize_raw(pd.DataFrame(rows)).set_index("check")
     assert s.loc["total", "mid_violations"] == len(rows)
     assert s.loc["total", "survive_bid_ask"] == sum(r["survives_bid_ask"] for r in rows)
+
+
+def test_butterfly_report_flags_wing_beyond_lee_bound():
+    from volsurf.arbitrage import butterfly_report
+
+    k = np.linspace(-1, 1, 11)
+    g = np.ones_like(k)
+    assert butterfly_report(k, g, right_slope=1.5)["arbitrage"] is False
+    rep = butterfly_report(k, g, right_slope=2.0)
+    assert rep["wing_ok"] is False and rep["arbitrage"] is True

@@ -5,12 +5,16 @@
 
 No-arbitrage conditions used here (checked algebraically in REPORT.md):
 
+Checked against the SSRN version of Gatheral and Jacquier (2014), dated
+17 March 2013 (abstract 2033323).
+
 * Calendar (GJ14 Thm 4.1): theta_t non-decreasing in t, and
   0 <= d(theta*phi)/dtheta <= (1 + sqrt(1 - rho^2)) / rho^2 * phi.
   For this phi, d(theta*phi)/dtheta / phi = (1 - gamma) / (1 + theta) < 1, so
   the second part always holds for gamma in (0, 1) and only monotone theta is needed.
-* Butterfly (GJ14 Thm 4.2): theta*phi*(1 + |rho|) < 4 and
-  theta*phi^2*(1 + |rho|) <= 4 for all theta > 0. With gamma in (0, 1/2] and
+* Butterfly (GJ14 Thm 4.2, sufficient): theta*phi*(1 + |rho|) < 4 and
+  theta*phi^2*(1 + |rho|) <= 4 for all theta > 0. Lemma 4.2 shows the first is
+  necessary and the second tight. With gamma in (0, 1/2] and
   eta*(1 + |rho|) <= 2 both hold for every theta, since theta*phi < eta and
   theta*phi^2 <= eta^2.
 
@@ -79,6 +83,12 @@ def ssvi_d2w(k, theta, rho, eta, gamma):
     k = np.asarray(k, float)
     p = phi(theta, eta, gamma)
     return 0.5 * theta * p**2 * (1 - rho**2) / ((p * k + rho) ** 2 + 1 - rho**2) ** 1.5
+
+
+def wing_slopes(theta, rho, eta, gamma) -> tuple[float, float]:
+    """Asymptotic slopes of w(k, theta) as k -> -inf and k -> +inf (GJ14 Remark 4.3)."""
+    tp = theta * phi(theta, eta, gamma)
+    return float(0.5 * (1 - rho) * tp), float(0.5 * (1 + rho) * tp)
 
 
 def check_constraints(p: SSVIParams, tol: float = 1e-9) -> dict:

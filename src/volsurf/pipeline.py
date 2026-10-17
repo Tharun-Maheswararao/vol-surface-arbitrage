@@ -15,7 +15,7 @@ import pandas as pd
 from . import arbitrage as arb
 from .data import CleanConfig, clean_chain, dedupe_roots, load_snapshot
 from .quotes import build_quotes
-from .ssvi import SSVIParams, check_constraints, fit_ssvi, ssvi_d2w, ssvi_dw, ssvi_w
+from .ssvi import SSVIParams, check_constraints, fit_ssvi, ssvi_d2w, ssvi_dw, ssvi_w, wing_slopes
 from .svi import SVIParams, fit_svi, satisfies_constraints, svi_d2w, svi_dw, svi_w
 
 K_GRID = np.linspace(-2.5, 1.0, 3501)
@@ -64,7 +64,8 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
         p, info = fit_svi(q["k"].values, q["w_mid"].values, weights=1.0 / q["spread_w"].values)
         svi_params[e] = p
         svi_rows.append({"expiry": e, "T": T_of[e], **p.to_dict(), "objective": info["objective"],
-                         "constraints_ok": satisfies_constraints(p), "min_variance": p.min_variance()})
+                         "constraints_ok": satisfies_constraints(p), "min_variance": p.min_variance(),
+                         "left_wing_slope": p.wing_slopes()[0], "right_wing_slope": p.wing_slopes()[1]})
 
     # 8. SSVI on the whole surface, with the no-arbitrage constraints and (diagnostic) without
     slices = [{"expiry": e, "T": T_of[e], "k": quotes.loc[quotes.expiry == e, "k"].values,
@@ -83,6 +84,12 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
         sp = ssvi_p if model == "ssvi" else free_p
         a = (sp.thetas[expiries.index(e)], sp.rho, sp.eta, sp.gamma)
         return (lambda k: ssvi_w(k, *a)), (lambda k: ssvi_dw(k, *a)), (lambda k: ssvi_d2w(k, *a))
+
+    def right_slope(model, e):
+        if model == "svi":
+            return svi_params[e].wing_slopes()[1]
+        sp = ssvi_p if model == "ssvi" else free_p
+        return wing_slopes(sp.thetas[expiries.index(e)], sp.rho, sp.eta, sp.gamma)[1]
 
     # model values at quotes + fit statistics
     stats = []
@@ -115,7 +122,8 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
             rec[f"w_{model}"] = w
             rec[f"g_{model}"] = g
             rec[f"density_{model}"] = arb.implied_density(K_GRID, w, dw, d2w)
-            fitted[model]["butterfly"][e] = arb.butterfly_report(K_GRID, g, k_data=np.array(kr[e]))
+            fitted[model]["butterfly"][e] = arb.butterfly_report(
+                K_GRID, g, k_data=np.array(kr[e]), right_slope=right_slope(model, e))
         curves.append(pd.DataFrame(rec))
     curves = pd.concat(curves, ignore_index=True)
 
@@ -138,6 +146,8 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
             "pct_inside_bid_ask": allrow["pct_inside_bid_ask"],
             "butterfly_slices_negative_g": sum(r["negative"] for r in bf),
             "butterfly_slices_negative_g_in_data": sum(r["negative_in_data_range"] for r in bf),
+            "butterfly_slices_wing_over_lee": sum(not r["wing_ok"] for r in bf),
+            "butterfly_slices_arbitrage": sum(r["arbitrage"] for r in bf),
             "calendar_pairs_crossing": sum(r["crossing"] for r in cal),
             "calendar_pairs_crossing_in_data": sum(r["crossing_in_data_range"] for r in cal),
             "n_params": 5 * len(expiries) if model == "svi" else 3 + len(expiries),

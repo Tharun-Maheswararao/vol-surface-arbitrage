@@ -9,6 +9,12 @@ Quasi-explicit idea: with y = (k - m) / sigma the slice is linear in
 
 so for fixed (m, sigma) the inner problem is a small constrained weighted
 linear least squares, and only (m, sigma) are searched numerically.
+
+The wings of a raw SVI slice are asymptotically linear with slopes b(1 - rho)
+(left) and b(1 + rho) (right). Lee's moment formula caps the asymptotic slope
+of total variance at 2, and Gatheral and Jacquier (2014, Lemma 2.2) need
+d+(k) -> -inf as k -> +inf, which fails once the right slope reaches 2. The fit
+therefore keeps b(1 + |rho|) <= WING_MAX, just below 2.
 """
 
 from __future__ import annotations
@@ -17,6 +23,9 @@ from dataclasses import asdict, dataclass
 
 import numpy as np
 from scipy.optimize import minimize
+
+LEE_SLOPE = 2.0     # Lee's bound on the asymptotic slope of total variance
+WING_MAX = 1.999    # fit bound on b(1 + |rho|), strictly inside Lee's bound
 
 
 @dataclass
@@ -32,6 +41,10 @@ class SVIParams:
 
     def min_variance(self) -> float:
         return self.a + self.b * self.sigma * np.sqrt(1 - self.rho**2)
+
+    def wing_slopes(self) -> tuple[float, float]:
+        """Asymptotic slopes of w(k) as k -> -inf and k -> +inf."""
+        return self.b * (1 - self.rho), self.b * (1 + self.rho)
 
 
 def svi_w(k, p: SVIParams):
@@ -51,7 +64,7 @@ def svi_d2w(k, p: SVIParams):
 
 def satisfies_constraints(p: SVIParams, tol: float = 1e-10) -> bool:
     return (p.b >= -tol and -1 < p.rho < 1 and p.sigma > 0
-            and p.min_variance() >= -tol and p.b * (1 + abs(p.rho)) <= 4 + tol)
+            and p.min_variance() >= -tol and p.b * (1 + abs(p.rho)) < LEE_SLOPE)
 
 
 # ----------------------------------------------------------------------------- inner solve
@@ -59,7 +72,7 @@ def satisfies_constraints(p: SVIParams, tol: float = 1e-10) -> bool:
 
 def _inner(y, w, wt, sigma):
     """Weighted LS for (a, c, d) subject to
-    0 <= c,  |d| <= c,  c + |d| <= 4 sigma   (b >= 0, |rho| <= 1, Lee: b(1+|rho|) <= 4)
+    0 <= c,  |d| <= c,  c + |d| <= WING_MAX sigma   (b >= 0, |rho| <= 1, b(1+|rho|) < 2)
     a + sqrt(c^2 - d^2) >= 0                (non-negative minimum variance)."""
     z = np.sqrt(y**2 + 1.0)
     X = np.column_stack([np.ones_like(y), y, z])  # columns: a, d, c
@@ -68,7 +81,7 @@ def _inner(y, w, wt, sigma):
 
     def feasible(v):
         a, d, c = v
-        return (c >= 0 and abs(d) <= c and c + abs(d) <= 4 * sigma
+        return (c >= 0 and abs(d) <= c and c + abs(d) <= WING_MAX * sigma
                 and a + np.sqrt(max(c * c - d * d, 0.0)) >= 0)
 
     v, *_ = np.linalg.lstsq(Xw, ww, rcond=None)
@@ -85,11 +98,11 @@ def _inner(y, w, wt, sigma):
     cons = [
         {"type": "ineq", "fun": lambda v: v[2] - v[1]},
         {"type": "ineq", "fun": lambda v: v[2] + v[1]},
-        {"type": "ineq", "fun": lambda v: 4 * sigma - v[2] - v[1]},
-        {"type": "ineq", "fun": lambda v: 4 * sigma - v[2] + v[1]},
+        {"type": "ineq", "fun": lambda v: WING_MAX * sigma - v[2] - v[1]},
+        {"type": "ineq", "fun": lambda v: WING_MAX * sigma - v[2] + v[1]},
         {"type": "ineq", "fun": lambda v: v[0] + np.sqrt(max(v[2] ** 2 - v[1] ** 2, 0.0))},
     ]
-    c0 = min(max(abs(v[2]), 1e-6), 2 * sigma)
+    c0 = min(max(abs(v[2]), 1e-6), 0.5 * WING_MAX * sigma)
     d0 = float(np.clip(v[1], -0.9 * c0, 0.9 * c0))
     x0 = np.array([max(v[0], 0.0), d0, c0])
     res = minimize(obj, x0, jac=jac, constraints=cons, method="SLSQP",

@@ -209,10 +209,20 @@ def _intervals(k, mask):
     return out
 
 
-def butterfly_report(k, g, k_data=None):
+LEE_SLOPE = 2.0
+
+
+def butterfly_report(k, g, k_data=None, right_slope=None):
+    """g(k) >= 0 everywhere *and* d+(k) -> -inf as k -> +inf (GJ14 Lemma 2.2).
+    The limit holds exactly when the right wing's asymptotic total-variance
+    slope is below Lee's bound of 2."""
     neg = g < -TOL
     rep = {"min_g": float(np.min(g)), "k_at_min_g": float(k[np.argmin(g)]),
            "negative": bool(neg.any()), "negative_intervals": _intervals(k, neg)}
+    if right_slope is not None:
+        rep["right_wing_slope"] = float(right_slope)
+        rep["wing_ok"] = bool(right_slope < LEE_SLOPE)
+        rep["arbitrage"] = bool(rep["negative"] or not rep["wing_ok"])
     if k_data is not None:
         inside = (k >= np.min(k_data)) & (k <= np.max(k_data))
         rep["min_g_in_data_range"] = float(np.min(g[inside])) if inside.any() else np.nan

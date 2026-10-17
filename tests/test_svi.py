@@ -69,3 +69,14 @@ def test_known_butterfly_arbitrage_slice_has_negative_g():
     assert g.min() < 0
     g_ok = g_function(k, svi_w(k, TRUE), svi_dw(k, TRUE), svi_d2w(k, TRUE))
     assert g_ok.min() > 0
+
+
+def test_fit_keeps_wings_inside_lee_bound():
+    """Data with a right wing steeper than Lee's bound must not produce a slice whose
+    asymptotic slope reaches 2 (GJ14 Lemma 2.2 needs d+ -> -inf)."""
+    steep = SVIParams(a=-0.05, b=2.2, rho=0.85, m=0.6, sigma=0.3)  # b(1+rho) = 4.07
+    k = np.linspace(-0.9, 0.2, 80)
+    p, _ = fit_svi(k, svi_w(k, steep))
+    assert satisfies_constraints(p)
+    assert p.b * (1 + abs(p.rho)) < 2
+    assert not satisfies_constraints(steep)

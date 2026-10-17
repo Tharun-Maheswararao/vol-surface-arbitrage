@@ -6,6 +6,9 @@
         "k_at_min_g": 0.19799999999999995,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.027557267978922752,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.06178270832467505,
         "negative_in_data_range": false
       },
@@ -19,6 +22,9 @@
             1.0
           ]
         ],
+        "right_wing_slope": 0.2688870951923187,
+        "wing_ok": true,
+        "arbitrage": true,
         "min_g_in_data_range": 0.10375912407008919,
         "negative_in_data_range": false
       },
@@ -32,78 +38,102 @@
             1.0
           ]
         ],
+        "right_wing_slope": 0.2878089915387149,
+        "wing_ok": true,
+        "arbitrage": true,
         "min_g_in_data_range": 0.12332003800349682,
         "negative_in_data_range": false
       },
       "2027-01-15": {
-        "min_g": -2.5747950056640985,
-        "k_at_min_g": 0.9830000000000001,
+        "min_g": -0.922251693947571,
+        "k_at_min_g": 0.9940000000000002,
         "negative": true,
         "negative_intervals": [
           [
-            0.6930000000000001,
+            0.6630000000000003,
             1.0
           ]
         ],
-        "min_g_in_data_range": 0.110557239507834,
+        "right_wing_slope": 1.999,
+        "wing_ok": true,
+        "arbitrage": true,
+        "min_g_in_data_range": 0.11087491268361208,
         "negative_in_data_range": false
       },
       "2027-02-19": {
-        "min_g": -0.96520673158668,
+        "min_g": -0.5469521404874391,
         "k_at_min_g": 1.0,
         "negative": true,
         "negative_intervals": [
           [
-            0.847,
+            0.8210000000000002,
             1.0
           ]
         ],
-        "min_g_in_data_range": 0.11149738073906126,
+        "right_wing_slope": 1.999,
+        "wing_ok": true,
+        "arbitrage": true,
+        "min_g_in_data_range": 0.11113029110331389,
         "negative_in_data_range": false
       },
       "2027-03-19": {
-        "min_g": -0.02030102206821538,
+        "min_g": -0.11736047615994782,
         "k_at_min_g": 1.0,
         "negative": true,
         "negative_intervals": [
           [
-            0.996,
+            0.9550000000000001,
             1.0
           ]
         ],
-        "min_g_in_data_range": 0.1081329174710448,
+        "right_wing_slope": 1.999,
+        "wing_ok": true,
+        "arbitrage": true,
+        "min_g_in_data_range": 0.10814413729333289,
         "negative_in_data_range": false
       },
       "2027-06-17": {
-        "min_g": 0.11473393963208725,
-        "k_at_min_g": -1.258,
+        "min_g": 0.11536932555007406,
+        "k_at_min_g": -1.2309999999999999,
         "negative": false,
         "negative_intervals": [],
-        "min_g_in_data_range": 0.11473393963208725,
+        "right_wing_slope": 1.999,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.11536932555007406,
         "negative_in_data_range": false
       },
       "2027-09-17": {
-        "min_g": 0.12800957816255573,
-        "k_at_min_g": -1.513,
+        "min_g": 0.1292923994935924,
+        "k_at_min_g": -1.472,
         "negative": false,
         "negative_intervals": [],
-        "min_g_in_data_range": 0.12800957816255573,
+        "right_wing_slope": 1.9990000000000003,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.1292923994935924,
         "negative_in_data_range": false
       },
       "2027-12-17": {
-        "min_g": 0.14063984198513144,
-        "k_at_min_g": -1.73,
+        "min_g": 0.14209707715071995,
+        "k_at_min_g": -1.68,
         "negative": false,
         "negative_intervals": [],
-        "min_g_in_data_range": 0.14063984198513144,
+        "right_wing_slope": 1.9990000000000003,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.14209707715071995,
         "negative_in_data_range": false
       },
       "2028-06-16": {
-        "min_g": 0.16957284434115485,
-        "k_at_min_g": -2.072,
+        "min_g": 0.1714769794737438,
+        "k_at_min_g": -2.025,
         "negative": false,
         "negative_intervals": [],
-        "min_g_in_data_range": 0.20638525423168427,
+        "right_wing_slope": 1.999,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.20652379254726505,
         "negative_in_data_range": false
       }
     },
@@ -123,14 +153,14 @@
         "crossing_in_data_range": false
       },
       "2026-12-18->2027-01-15": {
-        "min_diff": 0.00018542750277469183,
-        "k_at_min_diff": 0.18300000000000027,
+        "min_diff": 6.409628134750739e-05,
+        "k_at_min_diff": 0.19399999999999995,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-01-15->2027-02-19": {
-        "min_diff": -0.6969725357874039,
+        "min_diff": -0.21760908458102712,
         "k_at_min_diff": 1.0,
         "crossing": true,
         "crossing_intervals": [
@@ -142,56 +172,56 @@
         "crossing_in_data_range": false
       },
       "2027-02-19->2027-03-19": {
-        "min_diff": -0.26093595775639433,
+        "min_diff": -0.14485701323197808,
         "k_at_min_diff": 1.0,
         "crossing": true,
         "crossing_intervals": [
           [
-            0.21300000000000008,
+            0.21799999999999997,
             1.0
           ]
         ],
         "crossing_in_data_range": false
       },
       "2027-03-19->2027-06-17": {
-        "min_diff": -0.19710633076439255,
+        "min_diff": -0.167329723393026,
         "k_at_min_diff": 1.0,
         "crossing": true,
         "crossing_intervals": [
           [
-            0.2669999999999999,
+            0.26800000000000024,
             1.0
           ]
         ],
         "crossing_in_data_range": false
       },
       "2027-06-17->2027-09-17": {
-        "min_diff": -0.06989883952618214,
+        "min_diff": -0.04127341719320998,
         "k_at_min_diff": 1.0,
         "crossing": true,
         "crossing_intervals": [
           [
-            0.38500000000000023,
+            0.399,
             1.0
           ]
         ],
         "crossing_in_data_range": false
       },
       "2027-09-17->2027-12-17": {
-        "min_diff": -0.026645318689460074,
+        "min_diff": -0.018053257142075507,
         "k_at_min_diff": 1.0,
         "crossing": true,
         "crossing_intervals": [
           [
-            0.496,
+            0.5110000000000001,
             1.0
           ]
         ],
         "crossing_in_data_range": false
       },
       "2027-12-17->2028-06-16": {
-        "min_diff": 0.006823570394398404,
-        "k_at_min_diff": 0.5670000000000002,
+        "min_diff": 0.007100847334113092,
+        "k_at_min_diff": 0.56,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
@@ -205,6 +235,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.006209237992210747,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.2639220227010676,
         "negative_in_data_range": false
       },
@@ -213,6 +246,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.009151960596190528,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.2664935553350512,
         "negative_in_data_range": false
       },
@@ -221,6 +257,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.012820209584823791,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.2681401855603899,
         "negative_in_data_range": false
       },
@@ -229,6 +268,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.015040756509025742,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.2668509390782751,
         "negative_in_data_range": false
       },
@@ -237,6 +279,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.01778617304327803,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.2672035372153726,
         "negative_in_data_range": false
       },
@@ -245,6 +290,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.020563556384138745,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.2672028458794768,
         "negative_in_data_range": false
       },
@@ -253,6 +301,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.026304026311397926,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.26475911187140516,
         "negative_in_data_range": false
       },
@@ -261,6 +312,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.030890996068791084,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.2659046630480794,
         "negative_in_data_range": false
       },
@@ -269,6 +323,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.03539108026666843,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.26488545187359225,
         "negative_in_data_range": false
       },
@@ -277,6 +334,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.041087093932283505,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.2934923470694545,
         "negative_in_data_range": false
       }
@@ -354,6 +414,9 @@
         "k_at_min_g": -0.02300000000000013,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.013143075600508532,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.12031780497812485,
         "negative_in_data_range": false
       },
@@ -362,6 +425,9 @@
         "k_at_min_g": -0.06400000000000006,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.020077682885786947,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.19264961080964685,
         "negative_in_data_range": false
       },
@@ -370,6 +436,9 @@
         "k_at_min_g": -0.133,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.026042563869050156,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.22150222182223833,
         "negative_in_data_range": false
       },
@@ -378,6 +447,9 @@
         "k_at_min_g": -0.22699999999999987,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.030646297839524196,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.23416288952393247,
         "negative_in_data_range": false
       },
@@ -386,6 +458,9 @@
         "k_at_min_g": -0.395,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.0351820880510066,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.24178965975498948,
         "negative_in_data_range": false
       },
@@ -394,6 +469,9 @@
         "k_at_min_g": -0.6619999999999999,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.03888720568817725,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.2455608185228982,
         "negative_in_data_range": false
       },
@@ -402,6 +480,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.04828423920198141,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.2496798276048342,
         "negative_in_data_range": false
       },
@@ -410,6 +491,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.055724319918997414,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.25248526466011223,
         "negative_in_data_range": false
       },
@@ -418,6 +502,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.062092351714569866,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.25411685105726584,
         "negative_in_data_range": false
       },
@@ -426,6 +513,9 @@
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
+        "right_wing_slope": 0.0712586855288324,
+        "wing_ok": true,
+        "arbitrage": false,
         "min_g_in_data_range": 0.27653666542559047,
         "negative_in_data_range": false
       }

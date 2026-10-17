@@ -117,7 +117,8 @@ a single SVI slice, so both models minimise the same objective.
 * **SVI**: raw parameterisation, quasi-explicit calibration (Zeliade 2009). For fixed
   (m, σ) the slice is linear in (a, bσ, ρbσ), solved by constrained weighted least
   squares. Only (m, σ) are searched, with Nelder–Mead from 12 starts. Constraints:
-  b ≥ 0, |ρ| < 1, σ > 0, a + bσ√(1−ρ²) ≥ 0, and Lee's wing bound b(1+|ρ|) ≤ 4.
+  b ≥ 0, |ρ| < 1, σ > 0, a + bσ√(1−ρ²) ≥ 0, and b(1+|ρ|) ≤ 1.999. The last one keeps
+  both asymptotic wing slopes, b(1±ρ), strictly below Lee's bound of 2.
 * **SSVI**: power-law φ(θ) = η / (θ^γ (1+θ)^(1−γ)). One global (ρ, η, γ) plus one θ
   per expiry, fitted jointly with bounded least squares. No-arbitrage holds by
   construction: η = 2s/(1+|ρ|) with s ∈ (0, 1], γ ∈ (0, ½], and θ is a cumulative sum
@@ -137,7 +138,7 @@ a single SVI slice, so both models minimise the same objective.
 | 2027-03-19 | 0.42 | 0.12 | 2.63 | 1.83 |
 | 2027-06-17 | 0.67 | 0.15 | 2.36 | 1.77 |
 | 2027-09-17 | 0.92 | 0.17 | 1.92 | 1.54 |
-| 2027-12-17 | 1.17 | 0.21 | 1.82 | 1.54 |
+| 2027-12-17 | 1.17 | 0.20 | 1.82 | 1.54 |
 | 2028-06-16 | 1.67 | 0.16 | 0.74 | 0.68 |
 | **All quotes (RMSE)** | | **0.16** | **3.00** | **1.93** |
 | MAE | | 0.13 | 1.91 | 1.41 |
@@ -151,24 +152,36 @@ put wing by up to 18 vol points.
 
 ### Fitted arbitrage
 
-Butterfly arbitrage is checked with Gatheral's g(k) on a grid k ∈ [−2.5, 1.0]. Calendar
+A slice is free of butterfly arbitrage if and only if g(k) ≥ 0 for every k *and*
+d₊(k) → −∞ as k → +∞ (GJ14 Lemma 2.2). The second condition holds exactly when the
+right wing's asymptotic total-variance slope is below Lee's bound of 2. Both are
+checked: g(k) on a grid k ∈ [−2.5, 1.0], and the wing slope analytically. Calendar
 arbitrage is checked by whether adjacent fitted slices cross (w at T₂ below w at T₁)
 on the same grid. Adjacent pairs are enough, because non-crossing is transitive.
 
-| Model | Params | RMSE (vol pts) | Slices with g < 0 | …inside quoted k range | Adjacent pairs crossing | …inside quoted k range |
-|---|---:|---:|---:|---:|---:|---:|
-| SVI | 50 | 0.16 | 5 of 10 | 0 | 6 of 9 | 0 |
-| SSVI | 13 | 3.00 | 0 | 0 | 0 | 0 |
-| SSVI unconstrained | 13 | 1.93 | 0 | 0 | 0 | 0 |
+| Model | Params | RMSE (vol pts) | Slices with g < 0 | …inside quoted k range | Wing slope ≥ 2 | Adjacent pairs crossing | …inside quoted k range |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| SVI | 50 | 0.16 | 5 of 10 | 0 | 0 | 6 of 9 | 0 |
+| SSVI | 13 | 3.00 | 0 | 0 | 0 | 0 | 0 |
+| SSVI unconstrained | 13 | 1.93 | 0 | 0 | 0 | 0 | 0 |
+
+**A correction.** The first version of this pipeline bounded SVI wings at
+b(1+|ρ|) ≤ 4. That was wrong: in total variance, Lee's moment formula caps the
+asymptotic slope at 2 (GJ14 Remark 4.3), and Lemma 2.2 needs the right slope strictly
+below 2. Under the old bound, 7 of the 10 SVI slices had right-wing slopes near 4.
+By the full Lemma 2.2 test, 9 of 10 slices then had butterfly arbitrage, not the 5
+originally reported. With the corrected bound, the same 7 slices sit on it (slope
+1.999), and RMSE moves from 0.163 to 0.164 vol points. The data barely constrain the
+far call wing, so tightening it costs almost nothing in fit.
 
 Every SVI arbitrage sits on the **call wing, beyond the last quoted strike**. g turns
-negative from k = 0.31 to 1.00 onward, depending on the slice (min g = −2.58 on 2027-01-15).
-Slices cross from k = 0.16 to 0.50 onward. The cause is visible in the parameters:
-for nine of ten expiries SVI puts its vertex to the right of the data (m = 0.19–1.21,
+negative from k = 0.31 to 0.96 onward, depending on the slice (min g = −0.92 on 2027-01-15).
+Slices cross from k = 0.16 to 0.51 onward. The cause is visible in the parameters:
+for nine of ten expiries SVI puts its vertex to the right of the data (m = 0.19–1.01,
 against a last quoted k of 0.07–0.41) with ρ > 0. On this snapshot the quoted smile is
 still falling at the last liquid call, so the data never pins the right wing. SVI is
-free to bend it however it likes, and with the wing near Lee's bound (b(1+|ρ|) ≈ 4) it
-bends hard. Inside the quoted range the SVI surface is clean, but as soon as you
+free to bend it however it likes. Seven slices push the wing all the way to the
+Lee bound, and it bends hard. Inside the quoted range the SVI surface is clean, but as soon as you
 extrapolate, for pricing or for a density, it is not.
 
 ## The trade-off
@@ -199,18 +212,20 @@ If you need a smile that matches quotes for marking or for spotting quote-level
 relative value, SVI per slice is the better tool, but its wings must be fixed or
 checked before any extrapolation. If you need a surface you can safely interpolate,
 extrapolate, take densities from or feed to a local-vol model, SSVI's guarantee is
-worth roughly 3 vol points of fit on short expiries. The usual way to get both is
-SSVI as a backbone with per-slice corrections, for example the eSSVI or SVI-JW
-calibration in Gatheral and Jacquier's §5. That is out of scope here.
+worth roughly 3 vol points of fit on short expiries. GJ14 §5.2 sketches a way to
+get both: start from a square-root SVI fit, then refit SVI slice by slice with a heavy
+penalty on "crossedness" (how far adjacent slices cross). That is out of scope here.
 
 ## No-arbitrage conditions used for SSVI
 
 From Gatheral and Jacquier (2014), *Arbitrage-free SVI volatility surfaces*,
-Quantitative Finance 14(1):
+Quantitative Finance 14(1). Checked against the SSRN version dated 17 March 2013
+(ssrn.com/abstract=2033323):
 
-1. **Calendar** (Thm 4.1): θ_t is non-decreasing in t, and
-   0 ≤ ∂_θ(θφ(θ)) ≤ (1/ρ²)(1 + √(1−ρ²)) φ(θ).
+1. **Calendar** (Thm 4.1, necessary and sufficient): θ_t is non-decreasing in t, and
+   0 ≤ ∂_θ(θφ(θ)) ≤ (1/ρ²)(1 + √(1−ρ²)) φ(θ) for all θ > 0, with no upper bound when ρ = 0.
 2. **Butterfly** (Thm 4.2, sufficient): θφ(θ)(1+|ρ|) < 4 and θφ(θ)²(1+|ρ|) ≤ 4 for all θ > 0.
+   Lemma 4.2 shows the first condition is necessary and the second is tight.
 
 For the power law φ(θ) = η θ^(−γ) (1+θ)^(γ−1):
 
@@ -222,16 +237,17 @@ For the power law φ(θ) = η θ^(−γ) (1+θ)^(γ−1):
   4/(1+|ρ|) ≤ 4 when η(1+|ρ|) ≤ 2.
 
 The project brief's conditions (γ ∈ (0, ½], η(1+|ρ|) ≤ 2, θ increasing) therefore
-imply both theorems. `tests/test_ssvi.py` also confirms this numerically:
+imply both theorems. This φ is the paper's equation (4.5) in Remark 4.4, which says it
+gives a surface "completely free of static arbitrage provided that η(1+|ρ|) ≤ 2"; the
+SSRN text states no restriction on γ at that point. The derivation above needs γ ≤ ½
+for the second butterfly condition: for γ > ½, θφ² grows without bound as θ → 0. That
+matches the paper's own analysis of the pure power law in the same remark, and it is
+exactly what the unconstrained fit (γ = 0.63) runs into. `tests/test_ssvi.py` also confirms this numerically:
 
 * for 20 random admissible parameter sets, g ≥ 0 and slices never cross;
 * fits to data generated outside the admissible region always return admissible
   parameters;
 * parameters outside the region do produce g < 0.
-
-The theorem numbers and statements above are from memory of the paper. I could not
-open the paper in this environment, so check them against the published version
-before citing.
 
 ## Limitations
 
