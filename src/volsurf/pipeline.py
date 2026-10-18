@@ -216,6 +216,15 @@ def load_results(path: str | Path) -> dict:
     }
 
 
+def default_results_root() -> Path:
+    """``results/`` of the project: the nearest one above the working directory,
+    falling back to the repository this package was installed from."""
+    for d in [Path.cwd(), *Path.cwd().parents]:
+        if (d / "results").is_dir() and (d / "pyproject.toml").exists():
+            return d / "results"
+    return Path(__file__).resolve().parents[2] / "results"
+
+
 def list_results(root: str | Path = "results") -> list[Path]:
     root = Path(root)
     return sorted(p for p in root.iterdir() if (p / "summary.json").exists()) if root.exists() else []

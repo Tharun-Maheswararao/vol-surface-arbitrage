@@ -40,3 +40,14 @@ def test_ssvi_recovers_truth_and_fits(results):
     stats = res["fit_stats"].set_index(["expiry", "model"])
     assert stats.loc[("ALL", "ssvi"), "rmse_volpts"] < 0.05
     assert stats.loc[("ALL", "svi"), "rmse_volpts"] < 0.05
+
+
+def test_default_results_root_from_subfolder(tmp_path, monkeypatch):
+    from volsurf.pipeline import default_results_root
+
+    (tmp_path / "results").mkdir()
+    (tmp_path / "pyproject.toml").write_text("")
+    sub = tmp_path / "notebooks"
+    sub.mkdir()
+    monkeypatch.chdir(sub)
+    assert default_results_root() == tmp_path / "results"

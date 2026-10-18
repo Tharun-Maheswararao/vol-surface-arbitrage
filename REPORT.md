@@ -52,8 +52,13 @@ for each of them were inverted from Black's formula on the forward with Brent's 
 Each expiry gets one weighted regression of C − P on K over strikes near the money,
 with weights 1 / (call spread + put spread) and a second pass that drops residuals
 beyond 3 MADs. The implied rates come out at 4.5–5.2% for every expiry past one
-month. The 2-week expiry gives 3.8%, which is expected: at T = 0.04 a parity residual
-of a few cents moves the implied rate a lot. Implied carry (r − q) is 3.3–4.2%. The residual
+month. The 2-week rate (3.8%) is not identified by parity on this feed. It ranges
+from −7% to 3.8% depending on the strike band used, by many standard errors, so C − P
+has small systematic curvature in K at two weeks. SPXW series also give lower rates than
+SPX on every shared date (2.7% vs 4.5% at 2026-11-20), and the 2-week expiry is the only
+SPXW slice here. The forward itself is stable to ±0.1 index points, and forcing a 4.6%
+rate changes the 2-week vols by under 0.01 vol points, so the surface is unaffected.
+Details are in [docs/robustness.md](docs/robustness.md). Implied carry (r − q) is 3.3–4.2%. The residual
 standard deviation is 0.07–0.24 index points; the 2028 expiry is the noisiest at
 0.65.
 
@@ -99,9 +104,14 @@ indicative in the delayed feed, not a firm price that could be hit. Honest
 conclusion: **620 apparent violations, 6 that survive displayed bid and ask, and 0 I
 would call tradable** without a live, firm quote on the zero-open-interest strike.
 
+The same six survivors appear under every cleaning threshold tested (spread filter
+0.3–0.8 of mid, ITM cut 5–20%), with the same profits. Their spreads are under 30% of
+mid, so no spread filter removes them; only an open-interest filter would.
+
 **The ITM diagnostic.** Running the same strike checks on every clean quote, including
 in-the-money strikes up to 10% ITM, gives 908 mid violations and 126 survivors, with
-"profits" up to $22,700 per contract. These are plainly bad data. For example, the
+"profits" up to $22,700 per contract. The survivor count depends on how deep into the
+money you go: 18 at a 5% ITM cut, 126 at 10%, 290 at 20%. These are plainly bad data. For example, the
 Feb-2027 8350 put is quoted 530.4/532.8 while the 8325 put is 601.1/606.9, and the
 8350 has zero open interest. ITM quotes in the Yahoo feed are unreliable, which is a
 second reason (besides liquidity) to build the surface from OTM options only.
@@ -161,7 +171,7 @@ on the same grid. Adjacent pairs are enough, because non-crossing is transitive.
 
 | Model | Params | RMSE (vol pts) | Slices with g < 0 | …inside quoted k range | Wing slope ≥ 2 | Adjacent pairs crossing | …inside quoted k range |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| SVI | 50 | 0.16 | 5 of 10 | 0 | 0 | 6 of 9 | 0 |
+| SVI | 50 | 0.16 | 5 of 10 | 0 | 0 | 6 of 9 (6–7 across thresholds) | 0 |
 | SSVI | 13 | 3.00 | 0 | 0 | 0 | 0 | 0 |
 | SSVI unconstrained | 13 | 1.93 | 0 | 0 | 0 | 0 | 0 |
 
@@ -186,7 +196,9 @@ extrapolate, for pricing or for a density, it is not.
 
 ## The trade-off
 
-**SVI fits each smile about 18 times more tightly than SSVI (0.16 vs 3.00 vol points)
+**SVI fits each smile 16–19 times more tightly than SSVI (0.16 vs 3.00 vol points at
+the default cleaning; SSVI ranges from 2.6 to 3.3 as the spread filter goes from 0.3 to
+0.8, while SVI stays at 0.16–0.18)
 and keeps 80% of fitted vols inside the bid-ask spread, against 9% for SSVI. But half
 of the SVI slices imply a negative density, and two thirds of adjacent expiry pairs
 cross, all in the extrapolated call wing. SSVI uses 13 parameters instead of 50 and is
@@ -260,16 +272,20 @@ exactly what the unconstrained fit (γ = 0.63) runs into. `tests/test_ssvi.py` a
   exactly why SVI's right wing is unconstrained.
 * **Calendar check interpolation.** Raw calendar checks interpolate the longer expiry's
   total variance linearly in k between neighbouring quotes no more than 0.05 apart. It
-  found no violations, even on mid.
+  found no violations, even on mid. An audit confirms that this zero is real. The check
+  made 2,088 comparisons (98.6% of shorter-expiry quotes), the tightest one still had
+  7.5% more total variance at the longer expiry, and an injected violation is detected.
+  Zero is expected for expiries three weeks or more apart.
 * **Fitted checks are grid-based.** k ∈ [−2.5, 1.0] with 3,501 points; the wider
   [−15, 15] check was run once for the SSVI fits.
 * **Rates.** Discount factors come from parity per expiry, not from an external OIS
-  curve. They span 4.5–5.2% past one month, and 3.8% at two weeks.
+  curve. They span 4.5–5.2% past one month. The 2-week figure (3.8%) is not identified;
+  see the forwards section.
 
 ## Resume bullet
 
 > Built an arbitrage-free implied volatility surface for SPX options across 10
-> expiries with 3.0 vol-point RMSE (0.16 for unconstrained per-slice SVI), by fitting
+> expiries with ≈3 vol-point RMSE (0.16 for unconstrained per-slice SVI), by fitting
 > SVI and SSVI under Gatheral–Jacquier constraints and flagging 620 raw quote
 > violations, of which 6 survived executable bid-ask prices, all on zero-open-interest
 > strikes.
