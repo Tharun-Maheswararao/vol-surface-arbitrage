@@ -1,0 +1,4 @@
+model,rmse_volpts,mae_volpts,pct_inside_bid_ask,butterfly_slices_negative_g,butterfly_slices_negative_g_in_data,butterfly_slices_wing_over_lee,butterfly_slices_arbitrage,calendar_pairs_crossing,calendar_pairs_crossing_in_data,n_params
+SVI,0.2479589248205701,0.15985992686914874,30.917874396135264,4,0,0,4,6,0,50
+SSVI,3.000219664183635,1.655579553153096,2.8019323671497585,0,0,0,0,0,0,13
+SSVI (unconstrained),2.362941452923489,1.5471026845195086,2.318840579710145,0,0,0,0,0,0,13

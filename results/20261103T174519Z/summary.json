@@ -1,0 +1,37 @@
+{
+  "snapshot_id": "20261103T174519Z",
+  "ticker": "^SPX",
+  "source": "Yahoo Finance via yfinance",
+  "fetch_time_utc": "2026-11-03T17:45:19+00:00",
+  "quote_time_utc": "2026-11-03T17:30:19+00:00",
+  "quote_delay_note": "Yahoo option quotes are delayed about 15 minutes; outside regular hours they are the last quotes of the prior session.",
+  "spot": 7579.47021484375,
+  "n_expiries": 10,
+  "expiries": [
+    "2026-11-17",
+    "2026-11-20",
+    "2027-01-15",
+    "2027-02-19",
+    "2027-03-19",
+    "2027-04-16",
+    "2027-06-17",
+    "2027-09-17",
+    "2027-12-17",
+    "2028-06-16"
+  ],
+  "n_quotes": 2092,
+  "clean_drop_counts": {
+    "input_rows": 4138,
+    "zero_bid": 227,
+    "crossed_or_locked": 1,
+    "wide_spread": 78,
+    "deep_itm": 996,
+    "kept": 2836
+  },
+  "raw_mid_violations": 661,
+  "raw_survive_bid_ask": 27,
+  "raw_full_chain_mid_violations": 1024,
+  "raw_full_chain_survive_bid_ask": 72,
+  "ssvi_constraints_ok": true,
+  "ssvi_unconstrained_constraints_ok": false
+}

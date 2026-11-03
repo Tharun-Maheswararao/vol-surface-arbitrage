@@ -1,11 +1,11 @@
 # Robustness checks on REPORT.md
 
 > **Note (added after this file was written).** The SVI wing bound was later corrected
-> from b(1+|ρ|) ≤ 4 to < 2 (Lee's bound in total variance; GJ14 Lemma 2.2). On the
-> baseline snapshot this changes SVI RMSE from 0.163 to 0.164 and leaves the counts of
-> negative-g slices (5) and crossings (6) unchanged. The SVI columns in the sensitivity
-> table were computed with the old bound and have not been rerun. Raw-quote and SSVI
-> numbers are unaffected.
+> from b(1+|ρ|) ≤ 4 to < 2 (Lee's bound in total variance; GJ14 Lemma 2.2). The
+> sensitivity grid in section 2 was rerun under the corrected bound on 2026-11-02. SVI
+> RMSE is unchanged at two decimals (baseline 0.163 → 0.164), and SVI g < 0 rises from 5
+> to 6 slices at max_rel_spread = 0.8, still none inside the quoted range. Raw-quote and
+> SSVI numbers are unaffected.
 
 Baseline: snapshot `20261017T212629Z` (Friday 2026-10-16 close, fetched Saturday) with
 the default `CleanConfig(max_rel_spread=0.5, deep_itm_moneyness=0.10)`. All sensitivity
@@ -13,21 +13,122 @@ runs below were written to a scratch directory, so nothing under `results/` chan
 baseline reproduces REPORT.md exactly: 620 mid violations, 6 surviving bid/ask, SVI RMSE
 0.16, SSVI RMSE 3.00.
 
-## 1. Live intraday snapshots: not yet run
+## 1. Live intraday snapshots (Tuesday 2026-11-03)
 
-These checks were run on Saturday 2026-10-17. The next US session opens on Monday
-2026-10-19 at 09:30 ET, so there are no live quotes to collect yet. The plan for that
-session is to collect three times (around 10:30, 12:45 and 15:15 ET) and run the
-pipeline on each:
+Three live snapshots were collected during the regular session on Tuesday 2026-11-03,
+with `volsurf collect` followed by `volsurf run data/raw/<snapshot_id>` (`run` takes the
+snapshot *directory*, not the bare id). Yahoo intraday option quotes are delayed about
+15 minutes, so the quote times are roughly 15 minutes before the fetch times:
 
-```bash
-.venv/bin/python -m volsurf collect
-.venv/bin/python -m volsurf run data/raw/<snapshot_id>
-```
+| Snapshot | Fetched (ET) | Quotes as of (ET) | Spot |
+|---|---|---|---:|
+| `20261103T153057Z` | 10:30 | ≈10:15 | 7,565.48 |
+| `20261103T174519Z` | 12:45 | ≈12:30 | 7,579.47 |
+| `20261103T202430Z` | 15:24 | ≈15:09 | 7,567.19 |
 
-`run` takes the snapshot *directory*, not the bare id. The two saved snapshots hold the
-same Friday quotes, so comparing them says nothing about robustness. They only differ in
-expiry selection:
+All three select the same 10 expiries (2026-11-17 SPXW, then SPX monthlies 2026-11-20
+through 2028-06-16). That set differs from the baseline's, whose first expiry was the
+2026-10-30 SPXW weekly. In both cases the first expiry is about two weeks out.
+
+| | `20261017T212629Z` (baseline) | `20261103T153057Z` | `20261103T174519Z` | `20261103T202430Z` |
+|---|---:|---:|---:|---:|
+| OTM quotes | 2,308 | 2,070 | 2,092 | 2,093 |
+| Mid violations | 620 | 729 | 661 | 674 |
+| Survive bid/ask | 6 | 32 | 27 | 34 |
+| …with a zero-OI leg | 6 | 22 | 21 | 23 |
+| Max surviving profit ($/contract) | 500 | 8,930 | 8,280 | 9,355 |
+| Calendar violations (mid) | 0 | 0 | 0 | 0 |
+| SVI / SSVI / SSVI-free RMSE | 0.16 / 3.00 / 1.93 | 0.25 / 3.00 / 2.36 | 0.26 / 3.20 / 2.49 | 0.26 / 3.22 / 2.53 |
+| SVI slices with g < 0 (inside quoted k) | 5 (0) | 4 (0) | 4 (0) | 4 (0) |
+| SVI adjacent pairs crossing (inside quoted k) | 6 (0) | 6 (0) | 4 (1) | 4 (1) |
+| First-expiry parity rate | 3.81% (SPXW) | 5.79% (SPXW) | 3.53% (SPXW) | 1.71% (SPXW) |
+| Rate range, other expiries | 4.5%–5.2% | 4.5%–5.0% | 4.6%–6.9% | 4.6%–5.0% |
+
+The 6.9% at 12:45 is the 2026-11-20 SPX slice (2.5 weeks). Every other non-first expiry
+is in 4.5%–5.0% in all three live runs.
+
+**Live survivors.** These are listed by expiry, check, strikes, profit per contract
+and the smallest open interest among the legs.
+
+*10:30 (`20261103T153057Z`), 32 survivors.*
+
+* 2026-11-17 butterflies: 7380/7390/7400 ($35, OI 25), 7570/7575/7580 ($78, OI 13),
+  7610/7620/7625 ($10, OI 8), 7645/7650/7655 ($60, OI 6).
+* Other positive-OI butterflies: 2027-01-15 7080/7120/7125 ($17, OI 249), 2027-02-19
+  7620/7625/7630 ($15, OI 74), 2027-04-16 7575/7600/7625 ($15, OI 975).
+* 2028-06-16, positive OI (all on the 6575 put, OI 18): slope bound 6550/6575 ($260),
+  butterflies 6525/6550/6575 ($165) and 6575/6600/6625 ($215).
+* 2028-06-16, zero OI (22): slope bound 5550/5575 ($580), 6000/6075 ($420), 6725/6775
+  ($1,000), 7150/7175 ($1,990), 7250/7275 ($2,170), 8125/8150 ($7,976); vertical
+  6775/6800 ($136), 7175/7200 ($856), 7275/7300 ($1,136), 8100/8125 ($7,580);
+  butterflies 4300/4400/4500 ($200), 5525/5550/5575 ($330), 5575/5600/5625 ($275),
+  5975/6000/6075 ($165), 6075/6100/6125 ($520), 6700/6725/6775 ($453), 6775/6800/6825
+  ($850), 7125/7150/7175 ($1,080), 7175/7200/7225 ($1,080), 7225/7250/7275 ($1,185),
+  7275/7300/7325 ($1,260), 8100/8125/8150 ($8,930).
+
+*12:45 (`20261103T174519Z`), 27 survivors.*
+
+* 2026-11-17 butterflies: 7520/7525/7530 ($15, OI 41), 7550/7560/7565 ($57, OI 47),
+  7575/7580/7585 ($45, OI 37).
+* 2028-06-16, positive OI (6575 put, OI 18): slope bound 6550/6575 ($110), butterflies
+  6525/6550/6575 ($130) and 6575/6600/6625 ($130).
+* 2028-06-16, zero OI (21): the same structures as at 10:30 except the 6775/6800
+  vertical, with profits $123–$8,280 (8100/8125/8150 butterfly $8,280, 8125/8150 slope
+  bound $7,305, 8100/8125 vertical $6,950).
+
+*15:24 (`20261103T202430Z`), 34 survivors.*
+
+* 2026-11-17 butterflies: 7390/7400/7410 ($15, OI 25), 7430/7440/7450 ($5, OI 118),
+  7480/7490/7500 ($40, OI 40), 7625/7630/7635 ($20, OI 11), 7635/7640/7645 ($40, OI 11),
+  7655/7660/7665 ($10, OI 6), 7695/7700/7705 ($15, OI 7), 7780/7785/7790 ($5, OI 21).
+* 2028-06-16, positive OI (6575 put, OI 18): slope bound 6550/6575 ($270), butterflies
+  6525/6550/6575 ($200) and 6575/6600/6625 ($195).
+* 2028-06-16, zero OI (23): the 10:30 set plus a 3900/4000/4300 butterfly ($10), with
+  profits $10–$9,355 (8100/8125/8150 butterfly $9,355, 8125/8150 slope bound $8,404,
+  8100/8125 vertical $8,000).
+
+**What the large survivors are.** The big 2028-06-16 profits all hang on a few
+zero-OI strikes whose tight quotes are out of line with their neighbours. At 15:24 the
+8125 call is quoted 731.6/739.3 (20.0% vol) between the 8100 call at 647.1/651.6 (17.5%)
+and the 8150 call at 620.5/624.5 (17.3%). The 7175 put (OI 0) is off the other way: at
+356.3/362.0 it sits below both the 7150 put (381.9/384.9) and the 7200 put (393.6/396.6). The positive-OI 2028 survivors all use the 6575 put (OI 18), which is
+quoted 253.0/261.6, below the 6550 put's bid of 264.3. The 2026-11-17 SPXW butterflies
+use 5- and 10-point strikes with 0.4–0.6-point spreads, and their profits are $5–$78
+per contract (cents to under a point per leg). They change strikes from run to run. With
+15-minute-delayed, unsynchronised quotes in a moving market, that is what quote
+asynchrony looks like. They should not be read as executable arbitrage.
+
+**Verdict on each weekend finding.**
+
+* **620 mid violations: holds.** Live counts are 661–729, the same order of magnitude,
+  on about 10% fewer OTM quotes.
+* **6 survivors, all with a zero-OI leg: fails as stated.** Live survivors number
+  27–34, and 21–23 of them have a zero-OI leg. The rest are tiny 2-week SPXW butterflies
+  (positive OI, $5–$78) and three 2028 structures on one OI-18 put with an inverted
+  quote. Only one weekend survivor reappears: the 2028-06-16 7125/7150/7175 butterfly,
+  in all three live runs. The qualitative reading holds: the large survivors are bad
+  quotes on illiquid strikes, and the remainder are within delayed-quote noise. The
+  "$30–$500" profit range does not hold; live maxima are $8,280–$9,355, all on zero-OI
+  legs.
+* **Raw calendar violations 0: holds.** Zero in every run.
+* **SVI RMSE 0.16 and SSVI 3.00: moves, but the gap holds.** SVI rises to 0.25–0.26 and
+  SSVI to 3.00–3.22 (SSVI-free 2.36–2.53). SSVI is 12–13× worse than SVI live, against
+  19× on the weekend, so the ratio is the figure to soften, not the ≈3 vol-point level.
+* **SVI g < 0 on 5 slices, none inside the quoted range: holds.** 4 slices live, none
+  inside the range.
+* **SVI crossings 6 of 9, none inside the quoted range: moves.** 4–6 of 9 cross. In the
+  12:45 and 15:24 runs, one pair (2027-02-19 → 2027-03-19) crosses from k ≈ 0.21–0.22
+  onward. The 2027-02-19 calls are quoted up to k = 0.227, so the crossing reaches about
+  0.01 into the quoted call wing. "None inside the quoted range" no longer holds strictly.
+* **2-week parity rate 3.8% (SPXW), the rest 4.5–5.2%: holds, and the 2-week rate is
+  even less stable.** The first-expiry SPXW rate moves from 5.8% to 3.5% to 1.7% over one
+  day. Other expiries stay in 4.5%–5.0% apart from one 6.9% on the 2.5-week SPX slice.
+  This supports section 4: the short-dated rate is not identified by parity on this feed.
+
+### Weekend snapshots (same Friday quotes)
+
+The two saved weekend snapshots hold the same Friday quotes and differ only in expiry
+selection, so comparing them says nothing about robustness:
 
 | | `20261017T212354Z` | `20261017T212629Z` (baseline) |
 |---|---:|---:|
@@ -39,8 +140,6 @@ expiry selection:
 | SVI / SSVI / SSVI-free RMSE | 0.17 / 2.98 / 1.92 | 0.16 / 3.00 / 1.93 |
 | SVI slices with g < 0 (inside quoted k) | 5 (0) | 5 (0) |
 | SVI adjacent pairs crossing (inside quoted k) | 5 (0) | 6 (0) |
-
-The live columns will be added here once Monday's runs are done.
 
 ## 2. Cleaning-threshold sensitivity
 
@@ -55,9 +154,9 @@ default.
 | 0.5 | 0.05 | 2,879 | 2,301 | 619 | 6 | 6 | 744 / 18 | 0.16 | 3.00 | 1.93 | 5 | 6 |
 | **0.5** | **0.10** | **3,241** | **2,308** | **620** | **6** | **6** | **908 / 126** | **0.16** | **3.00** | **1.93** | **5** | **6** |
 | 0.5 | 0.20 | 3,622 | 2,308 | 621 | 6 | 6 | 1,125 / 290 | 0.16 | 3.00 | 1.92 | 5 | 6 |
-| 0.8 | 0.05 | 2,949 | 2,371 | 638 | 6 | 6 | 763 / 18 | 0.17 | 3.26 | 2.09 | 5 | 7 |
-| 0.8 | 0.10 | 3,311 | 2,378 | 639 | 6 | 6 | 927 / 126 | 0.17 | 3.26 | 2.09 | 5 | 7 |
-| 0.8 | 0.20 | 3,692 | 2,378 | 640 | 6 | 6 | 1,144 / 290 | 0.18 | 3.26 | 2.09 | 5 | 7 |
+| 0.8 | 0.05 | 2,949 | 2,371 | 638 | 6 | 6 | 763 / 18 | 0.17 | 3.26 | 2.09 | 6 | 7 |
+| 0.8 | 0.10 | 3,311 | 2,378 | 639 | 6 | 6 | 927 / 126 | 0.17 | 3.26 | 2.09 | 6 | 7 |
+| 0.8 | 0.20 | 3,692 | 2,378 | 640 | 6 | 6 | 1,144 / 290 | 0.18 | 3.26 | 2.09 | 6 | 7 |
 
 In every configuration, none of the SVI g < 0 slices or crossings lies inside the quoted k range.
 
@@ -79,8 +178,8 @@ In every configuration, none of the SVI g < 0 slices or crossings lies inside th
   more deep-OTM short-dated puts, and that is exactly where SSVI misses. The 3.00 figure
   is a property of the cleaning choice as much as of the model. The SVI/SSVI ratio moves
   between about 16× and 19×.
-* **SVI arbitrage counts barely move.** 5 slices have g < 0 in every configuration, and
-  6–7 adjacent pairs cross. None of either is inside the quoted range.
+* **SVI arbitrage counts barely move.** 5 slices have g < 0 (6 at a spread filter of 0.8),
+  and 6–7 adjacent pairs cross. None of either is inside the quoted range.
 
 ## 3. Raw calendar check: the 0 is real
 
@@ -159,6 +258,9 @@ the surface, but it should not be read as a market rate.
 
 ## Proposed changes to REPORT.md
 
+All nine were applied to REPORT.md: items 1–7 on 2026-10-17, and item 5's
+qualifier, 8 and 9 on 2026-11-03.
+
 1. **Forwards section (line 54–58).** Replace "The 2-week expiry gives 3.8%, which is
    expected: … moves the implied rate a lot" with: the 2-week rate is not identified. It
    ranges from −7% to 3.8% depending on the strike band, and SPXW series give lower rates
@@ -181,8 +283,31 @@ the surface, but it should not be read as a market rate.
    short-expiry quotes), minimum variance margin +7.5%, and an injected violation is
    detected. Zero is expected for expiries 3 weeks or more apart.
 7. **Limitations, "Rates" bullet.** Cross-reference item 1.
-8. **Limitations, "One delayed weekend snapshot".** After the Monday runs, replace this
-   with the live comparison, or keep it if that has not been done.
-9. **Resume bullet.** Change "3.0 vol-point RMSE" to "≈3 vol-point RMSE". Hold the
-   "6 survived … all on zero-open-interest strikes" claim until the live snapshots confirm
-   it.
+8. **Limitations, "One delayed weekend snapshot".** Replace the bullet with:
+
+   > * **Snapshot dependence.** The headline numbers come from one weekend snapshot
+   >   (Friday 2026-10-16 close). Three live snapshots on Tuesday 2026-11-03 (10:30,
+   >   12:45 and 15:24 ET; quotes delayed about 15 minutes) give 661–729 mid violations,
+   >   zero raw calendar violations, SVI RMSE 0.25–0.26 and SSVI RMSE 3.0–3.2, so the
+   >   SVI/SSVI gap holds at 12–13× instead of 19×. The survivor count does not hold:
+   >   27–34 violations survive bid/ask live, against 6 on the weekend. 21–23 of them
+   >   have a zero-open-interest leg and carry the large "profits" (up to $9,355 per
+   >   contract) on mis-marked 2028-06-16 strikes. The rest are $5–$78 two-week SPXW
+   >   butterflies on 5- and 10-point strikes that change from run to run, consistent
+   >   with unsynchronised delayed quotes, plus three structures on one inverted
+   >   OI-18 put. The 2-week SPXW parity rate moved from 5.8% to 1.7% within the day.
+   >   Fitted SVI calendar crossings reached about 0.01 into the quoted call wing on
+   >   one pair (2027-02-19 → 2027-03-19) in two of the three runs. See
+   >   docs/robustness.md, section 1.
+
+   Item 5 should then say "outside the quoted range on the weekend snapshot".
+9. **Resume bullet.** Replace with:
+
+   > Built an arbitrage-free implied volatility surface for SPX options across 10
+   > expiries with ≈3 vol-point RMSE (0.16–0.26 for unconstrained per-slice SVI), by
+   > fitting SVI and SSVI under Gatheral–Jacquier constraints, and flagged 620–730 raw
+   > quote violations per snapshot. The 6–34 per snapshot that survived bid-ask prices traced to
+   > zero-open-interest strikes or delayed, unsynchronised quotes.
+
+   This drops "6 survived … all on zero-open-interest strikes", which the live runs do
+   not support (27–34 survivors, about two-thirds with a zero-OI leg).

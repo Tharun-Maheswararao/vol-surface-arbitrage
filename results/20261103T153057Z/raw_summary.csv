@@ -1,0 +1,5 @@
+check,mid_violations,survive_bid_ask,max_profit_usd
+butterfly,704,21,8930.000000000007
+slope_bound,19,7,7975.789619696692
+vertical,6,4,7580.000000000007
+total,729,32,8930.000000000007
