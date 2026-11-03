@@ -42,6 +42,16 @@ def test_ssvi_recovers_truth_and_fits(results):
     assert stats.loc[("ALL", "svi"), "rmse_volpts"] < 0.05
 
 
+def test_essvi_is_admissible_and_at_least_as_good_as_ssvi(results):
+    res, _ = results
+    assert res["essvi_meta"]["constraints"]["all_ok"]
+    assert res["summary"]["essvi_constraints_ok"]
+    comp = res["comparison"].set_index("model")
+    assert comp.loc["eSSVI", "butterfly_slices_arbitrage"] == 0
+    assert comp.loc["eSSVI", "calendar_pairs_crossing"] == 0
+    assert comp.loc["eSSVI", "rmse_volpts"] <= comp.loc["SSVI", "rmse_volpts"] + 1e-6
+
+
 def test_default_results_root_from_subfolder(tmp_path, monkeypatch):
     from volsurf.pipeline import default_results_root
 
