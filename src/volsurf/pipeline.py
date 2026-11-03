@@ -21,6 +21,9 @@ from .svi import SVIParams, fit_svi, satisfies_constraints, svi_d2w, svi_dw, svi
 K_GRID = np.linspace(-2.5, 1.0, 3501)
 MODELS = ("svi", "ssvi", "ssvi_free")
 MODEL_LABELS = {"svi": "SVI", "ssvi": "SSVI", "ssvi_free": "SSVI (unconstrained)"}
+# Snapshot REPORT.md is written from (the 2026-10-16 close). Later snapshots, such as the
+# live 2026-11-03 ones in docs/robustness.md, sort after it but are not the default view.
+BASELINE_SNAPSHOT = "20261017T212629Z"
 
 
 def _fit_stats(q: pd.DataFrame, w_model: np.ndarray) -> dict:
