@@ -10,17 +10,30 @@ two ways: SVI one expiry at a time, and SSVI across the whole surface. It then
 checks both the raw quotes and the fitted surfaces for static arbitrage. Every raw
 violation is checked twice, on mid prices and on executable bid/ask prices.
 
-**Headline (snapshot of the 2026-10-16 close, 10 expiries, 2,308 OTM quotes):**
+**Headline.** The weekend column is the 2026-10-16 close (10 expiries, 2,308 OTM
+quotes). The live column is the range over three intraday snapshots on 2026-11-03
+(10 expiries, about 2,080 OTM quotes, quotes delayed about 15 minutes).
 
-| | SVI | SSVI |
-|---|---:|---:|
-| RMSE (vol points) | 0.16 | 3.00 |
-| Fitted vols inside bid-ask | 80% | 9% |
-| Slices with negative density (g < 0) | 5 of 10, all beyond the last quoted call | 0 |
-| Adjacent expiries crossing | 6 of 9, all beyond the last quoted call | 0 |
+| | SVI (weekend) | SSVI (weekend) | SVI (live) | SSVI (live) |
+|---|---:|---:|---:|---:|
+| RMSE (vol points) | 0.16 | 3.00 | 0.25–0.26 | 3.00–3.22 |
+| Fitted vols inside bid-ask | 80% | 9% | 28–31% | 2–3% |
+| Slices with negative density (g < 0) | 5 of 10 | 0 | 4 of 10 | 0 |
+| Adjacent expiries crossing | 6 of 9 | 0 | 4–6 of 9 | 0 |
 
-Raw quotes: **620** violations on mid, **6** survive bid and ask, and every one of the 6
-has a leg with zero open interest. See [REPORT.md](REPORT.md) for the full write-up.
+Every SVI negative-density slice lies beyond the last quoted call. Every SVI crossing
+does too, except one pair in two of the live runs, which reaches about 0.01 in k inside
+the quoted call wing.
+
+Raw quotes, weekend: **620** violations on mid, **6** survive bid and ask, and every one
+of the 6 has a leg with zero open interest. Raw quotes, live: **661–729** on mid and
+**27–34** survive bid and ask. Of those, 21–23 have a zero-open-interest leg and are bad
+quotes on illiquid 2028 strikes. Most of the rest are $5–$78 two-week butterflies that
+change strike from run to run, consistent with unsynchronised, delayed quotes. None of
+these looks tradable.
+
+See [REPORT.md](REPORT.md) for the full write-up and
+[docs/robustness.md](docs/robustness.md) for the robustness checks.
 
 ## Quick start
 

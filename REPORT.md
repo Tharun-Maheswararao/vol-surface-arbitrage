@@ -212,7 +212,8 @@ the last quoted call, so the clean-inside-the-data result holds only approximate
 the default cleaning; SSVI ranges from 2.6 to 3.3 as the spread filter goes from 0.3 to
 0.8, while SVI stays at 0.16–0.18; on the live snapshots it is 0.25–0.26 vs 3.0–3.2,
 or 12–13×)
-and keeps 80% of fitted vols inside the bid-ask spread, against 9% for SSVI. But half
+and keeps 80% of fitted vols inside the bid-ask spread, against 9% for SSVI (28–31%
+against 2–3% on the tighter live intraday spreads). But half
 of the SVI slices imply a negative density, and two thirds of adjacent expiry pairs
 cross, all in the extrapolated call wing on this snapshot. SSVI uses 13 parameters instead of 50 and is
 arbitrage-free everywhere by construction, at the cost of missing the short-dated
