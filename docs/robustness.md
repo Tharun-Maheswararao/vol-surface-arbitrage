@@ -256,6 +256,50 @@ not of the rate curve. Two other explanations do not hold:
 Conclusion: the 2-week rate is not identified by parity on this feed. It is harmless for
 the surface, but it should not be read as a market rate.
 
+**Borrowing D from the SPX curve (option, off by default).** `ForwardConfig` in
+`quotes.py` (`volsurf run --fixed-d-max-t T --fixed-d-spxw`) targets expiries with T
+below a threshold, SPXW slices, or both. A targeted expiry takes D from the parity
+discount factors of the untargeted SPX expiries: log-linear in T between them, and a
+flat rate before the first and after the last. Only F is then refitted, by the same
+weighted, MAD-trimmed regression with the slope fixed at −D. `forwards.csv` gains a
+`D_source` column (`parity`, `spx_interp` or `spx_extrap`). With the defaults every
+expiry is `parity`, and the four snapshots below reproduce the committed `forwards.csv`
+and `comparison.csv`. The runs were written to a scratch results root.
+
+| Snapshot | 1st-expiry parity rate | SPXW only | T < 0.08 + SPXW | ΔF, 1st expiry | 2026-11-20 SPX rate, ΔF | Max \|Δ vol\| (vol pts) | SVI / SSVI / SSVI-free RMSE |
+|---|---:|---:|---:|---:|---:|---:|---|
+| `20261017T212629Z` | 3.81% | 4.48% | 4.48% | +0.002 | not targeted (T = 0.095) | 0.004 | 0.16 / 3.00 / 1.93, unchanged |
+| `20261103T153057Z` | 5.79% | 4.83% | 4.51% | +0.023 | 4.83% → 4.51%, +0.166 | 0.015 | 0.25 / 3.00 / 2.36, unchanged |
+| `20261103T174519Z` | 3.53% | **6.90%** | 4.93% | −0.005 | 6.90% → 4.93%, −0.035 | 0.018 | 0.26 / 3.20 / 2.49, unchanged |
+| `20261103T202430Z` | 1.71% | 4.64% | 5.03% | −0.144 | 4.64% → 5.03%, +0.015 | 0.034 | 0.26 / 3.22 / 2.53, unchanged |
+
+ΔF and Δ vol are for T < 0.08 + SPXW against the default. Every rate in the two
+borrowed columns is `spx_extrap`, a flat extrapolation of the first untargeted SPX
+expiry.
+
+* **SPXW-only is not enough.** It anchors on the 2026-11-20 SPX slice. That slice is
+  only 2.5 weeks out on the live days and has the same identification problem, so at
+  12:45 it hands its 6.9% to the SPXW slice.
+* **T < 0.08 plus SPXW pins the short end.** The first-expiry rate becomes 4.5%–5.0%
+  across the live runs (against 1.7%–5.8%), and 4.5% on the baseline. It now moves only
+  as much as the anchor's parity rate does: 2027-01-15 live, 2026-11-20 on the baseline.
+* **The surface does not notice.** F moves by at most 0.17 index points. Vols move by at
+  most 0.034 vol points. Overall RMSEs change by at most 0.0005 vol points, and slice
+  RMSEs by at most 0.005. The OTM quote sets, raw violations and survivors, and SVI and
+  SSVI arbitrage counts are all identical to the default runs. The one count that moves
+  is the full-chain ITM diagnostic at 12:45 under SPXW-only, which goes from 1,024 to
+  1,025 mid violations.
+* With D fixed, the MAD pass trims 2–4 more pairs on several live short slices, and
+  `resid_std` falls. For example, 2026-11-20 at 15:24 falls from 0.68 to 0.38. A free
+  slope had been absorbing part of the curvature in C − P.
+
+**Recommendation:** make `ForwardConfig(fixed_d_max_T=0.08, fixed_d_spxw=True)` the
+default, in a separate change that regenerates `results/` and rewrites REPORT.md's
+forwards paragraph. The fits gain nothing measurable. The gain is a forwards table whose
+short-dated rates look like a rate curve and are labelled as borrowed, instead of 1.7%
+or 6.9% values that the text then has to explain away. It should not be turned on in
+SPXW-only form.
+
 ## 5. Which bid/ask survivors are tradable?
 
 `raw_arbitrage` now labels every violation that survives bid/ask (column

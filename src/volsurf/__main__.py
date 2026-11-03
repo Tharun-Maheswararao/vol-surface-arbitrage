@@ -13,6 +13,7 @@ from pathlib import Path
 
 from .data import CleanConfig, collect_snapshot, list_snapshots
 from .pipeline import BASELINE_SNAPSHOT, run_pipeline
+from .quotes import ForwardConfig
 
 
 def main(argv=None):
@@ -27,6 +28,11 @@ def main(argv=None):
     r.add_argument("--results-root", default="results")
     r.add_argument("--min-open-interest", type=int, default=None,
                    help="drop quotes with less open interest (default: off)")
+    r.add_argument("--fixed-d-max-t", type=float, default=None, metavar="T",
+                   help="take D from the SPX rate curve for expiries shorter than T years "
+                        "and fit only F (default: off)")
+    r.add_argument("--fixed-d-spxw", action="store_true",
+                   help="take D from the SPX rate curve for SPXW expiries (default: off)")
     f = sub.add_parser("figures", help="write static figures for a result")
     f.add_argument("result", nargs="?")
     f.add_argument("--results-root", default="results")
@@ -37,7 +43,8 @@ def main(argv=None):
     elif a.cmd == "run":
         snap = Path(a.snapshot) if a.snapshot else list_snapshots(a.raw_root)[-1]
         cfg = CleanConfig(min_open_interest=a.min_open_interest)
-        print(run_pipeline(snap, a.results_root, cfg))
+        fcfg = ForwardConfig(fixed_d_max_T=a.fixed_d_max_t, fixed_d_spxw=a.fixed_d_spxw)
+        print(run_pipeline(snap, a.results_root, cfg, fcfg))
     elif a.cmd == "figures":
         os.environ.setdefault("MPLBACKEND", "Agg")
         from .plotting import save_all_figures

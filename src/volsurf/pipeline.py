@@ -18,7 +18,7 @@ from .data import CleanConfig, clean_chain, dedupe_roots, load_snapshot
 from .essvi import ESSVIParams, essvi_d2w, essvi_dw, essvi_w, fit_essvi
 from .essvi import check_constraints as essvi_check_constraints
 from .essvi import wing_slopes as essvi_wing_slopes
-from .quotes import build_quotes
+from .quotes import ForwardConfig, build_quotes
 from .ssvi import SSVIParams, check_constraints, fit_ssvi, ssvi_d2w, ssvi_dw, ssvi_w, wing_slopes
 from .svi import SVIParams, fit_svi, satisfies_constraints, svi_d2w, svi_dw, svi_w
 
@@ -41,7 +41,8 @@ def _fit_stats(q: pd.DataFrame, w_model: np.ndarray) -> dict:
 
 
 def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
-                 clean_cfg: CleanConfig = CleanConfig()) -> Path:
+                 clean_cfg: CleanConfig = CleanConfig(),
+                 fwd_cfg: ForwardConfig = ForwardConfig()) -> Path:
     snapshot_dir = Path(snapshot_dir)
     chain, meta = load_snapshot(snapshot_dir)
     out = Path(results_root) / meta["snapshot_id"]
@@ -52,7 +53,7 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
     clean, drop_counts = clean_chain(chain, meta["spot"], clean_cfg)
 
     # 3-5. forwards, OTM selection, implied vols
-    quotes, forwards = build_quotes(clean, meta)
+    quotes, forwards = build_quotes(clean, meta, fwd_cfg)
     clean = clean[clean["expiry"].isin(forwards["expiry"])]
 
     # 6. raw quote arbitrage: OTM set (primary) and full clean chain (diagnostic)
@@ -196,6 +197,7 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
         "quote_delay_note": meta["quote_delay_note"], "spot": meta["spot"],
         "n_expiries": len(expiries), "expiries": expiries, "n_quotes": int(len(quotes)),
         "clean_config": asdict(clean_cfg),
+        "forward_config": asdict(fwd_cfg),
         "clean_drop_counts": drop_counts,
         "raw_mid_violations": int(len(raw)),
         "raw_survive_bid_ask": int(raw["survives_bid_ask"].sum()) if len(raw) else 0,

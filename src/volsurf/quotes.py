@@ -3,14 +3,33 @@ implied volatility table with bid, mid and ask vols."""
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
 
 from .data import expiry_datetime, year_fraction
-from .forwards import fit_forward
+from .forwards import discount_from_curve, fit_forward
 from .pricing import implied_vol_vec
+
+
+@dataclass(frozen=True)
+class ForwardConfig:
+    """Which expiries take D from the SPX rate curve instead of their own parity slope.
+
+    A targeted expiry (T below ``fixed_d_max_T``, or any SPXW slice if
+    ``fixed_d_spxw``) gets D log-linearly interpolated from the parity discount
+    factors of the untargeted SPX expiries, with a flat rate outside them, and only
+    F is fitted. The default targets nothing, so every D comes from its own parity
+    regression.
+    """
+    fixed_d_max_T: float | None = None
+    fixed_d_spxw: bool = False
+
+    def targets(self, root: str, T: float) -> bool:
+        return ((self.fixed_d_max_T is not None and T < self.fixed_d_max_T)
+                or (self.fixed_d_spxw and root == "SPXW"))
 
 
 def parity_pairs(g: pd.DataFrame, spot: float, T: float) -> pd.DataFrame:
@@ -32,11 +51,12 @@ def parity_pairs(g: pd.DataFrame, spot: float, T: float) -> pd.DataFrame:
     return pairs.reset_index(drop=True)
 
 
-def build_quotes(chain: pd.DataFrame, meta: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
+def build_quotes(chain: pd.DataFrame, meta: dict,
+                 fwd_cfg: ForwardConfig = ForwardConfig()) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Return (quotes, forwards). ``chain`` must already be cleaned and de-duplicated."""
     asof = datetime.fromisoformat(meta["quote_time_utc"])
     spot = float(meta["spot"])
-    q_frames, f_rows = [], []
+    slices = []
     for e, g in chain.groupby("expiry", sort=True):
         root = g["root"].iloc[0]
         T = year_fraction(asof, expiry_datetime(e, root))
@@ -46,12 +66,34 @@ def build_quotes(chain: pd.DataFrame, meta: dict) -> tuple[pd.DataFrame, pd.Data
         if len(pairs) < 3:
             continue
         wts = 1.0 / (pairs["call_spread"] + pairs["put_spread"])
-        fw = fit_forward(pairs["strike"], pairs["call_mid"], pairs["put_mid"], weights=wts)
+        slices.append((e, g, root, T, pairs, wts))
+
+    def fit(pairs, wts, D=None):
+        return fit_forward(pairs["strike"], pairs["call_mid"], pairs["put_mid"], weights=wts, D=D)
+
+    # parity fits for the untargeted expiries; their SPX slices form the rate curve
+    fits = {e: fit(pairs, wts) for e, _, root, T, pairs, wts in slices
+            if not fwd_cfg.targets(root, T)}
+    source = dict.fromkeys(fits, "parity")
+    ref = [(T, fits[e].D) for e, _, root, T, _, _ in slices if e in fits and root == "SPX"]
+    for e, _, _, T, pairs, wts in slices:
+        if e in fits:
+            continue
+        if not ref:  # no SPX curve to borrow from
+            fits[e], source[e] = fit(pairs, wts), "parity"
+            continue
+        T_ref, D_ref = zip(*ref)
+        fits[e] = fit(pairs, wts, D=discount_from_curve(T, T_ref, D_ref))
+        source[e] = "spx_interp" if min(T_ref) <= T <= max(T_ref) else "spx_extrap"
+
+    q_frames, f_rows = [], []
+    for e, g, root, T, _, _ in slices:
+        fw = fits[e]
         F, D = fw.F, fw.D
         f_rows.append({
             "expiry": e, "root": root, "T": T, "F": F, "D": D, "rate": fw.rate(T),
             "carry": np.log(F / spot) / T, "n_pairs": fw.n_pairs, "n_used": fw.n_used,
-            "resid_std": fw.resid_std, "spot": spot,
+            "resid_std": fw.resid_std, "spot": spot, "D_source": source[e],
         })
 
         otm = g[((g["type"] == "put") & (g["strike"] < F)) |
