@@ -12,12 +12,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 
+from .essvi import essvi_w
 from .ssvi import ssvi_w
 from .svi import svi_w
 
 # Categorical slots (fixed order) and neutral inks
-COLORS = {"svi": "#2a78d6", "ssvi": "#eb6834", "ssvi_free": "#1baf7a"}
-LABELS = {"svi": "SVI", "ssvi": "SSVI", "ssvi_free": "SSVI (unconstrained)"}
+COLORS = {"svi": "#2a78d6", "ssvi": "#eb6834", "ssvi_free": "#1baf7a", "essvi": "#8c4fd6"}
+LABELS = {"svi": "SVI", "ssvi": "SSVI", "ssvi_free": "SSVI (unconstrained)", "essvi": "eSSVI"}
 INK, INK_2, INK_3, GRID, SURFACE = "#0b0b0b", "#52514e", "#8a8984", "#e4e3df", "#fcfcfb"
 QUOTE = "#6f6e69"
 BLUE_RAMP = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
@@ -55,6 +56,9 @@ def expiries(res):
 def model_w(res, model, expiry, k):
     if model == "svi":
         return svi_w(k, res["svi"][expiry])
+    if model == "essvi":
+        p = res["essvi"]
+        return essvi_w(k, *p.slice(list(p.expiries).index(expiry)))
     p = res["ssvi"] if model == "ssvi" else res["ssvi_free"]
     i = list(p.expiries).index(expiry)
     return ssvi_w(k, p.thetas[i], p.rho, p.eta, p.gamma)
@@ -150,7 +154,8 @@ def density_figure(res, model="ssvi", k_range=(-0.8, 0.4)):
 
 
 def surface_grid(res, model="ssvi", k_range=(-0.6, 0.3), nk=61, nT=60):
-    """Implied vol on a (k, T) grid. SSVI interpolates theta linearly in T; SVI
+    """Implied vol on a (k, T) grid. SSVI interpolates theta linearly in T; eSSVI
+    interpolates theta, psi and rho*psi linearly in T (ESSVIParams.slice_at); SVI
     interpolates total variance linearly in T at fixed k between fitted expiries."""
     Ts_e = res["forwards"].sort_values("T")["T"].values
     exps = expiries(res)
@@ -160,6 +165,8 @@ def surface_grid(res, model="ssvi", k_range=(-0.6, 0.3), nk=61, nT=60):
         p = res["ssvi"] if model == "ssvi" else res["ssvi_free"]
         th = p.theta_at(T)
         W = np.array([ssvi_w(k, t, p.rho, p.eta, p.gamma) for t in th])
+    elif model == "essvi":
+        W = np.array([essvi_w(k, *res["essvi"].slice_at(t)) for t in T])
     else:
         We = np.array([svi_w(k, res["svi"][e]) for e in exps])
         W = np.array([[np.interp(t, Ts_e, We[:, j]) for j in range(nk)] for t in T])
@@ -242,7 +249,7 @@ def plotly_surface(res, models=("ssvi",)):
     import plotly.graph_objects as go
 
     fig = go.Figure()
-    scales = {"svi": "Blues", "ssvi": "Oranges", "ssvi_free": "Teal"}
+    scales = {"svi": "Blues", "ssvi": "Oranges", "ssvi_free": "Teal", "essvi": "Purples"}
     for m in models:
         k, T, V = surface_grid(res, m)
         fig.add_trace(go.Surface(x=k, y=T, z=V, name=LABELS[m], colorscale=scales[m], showscale=False,

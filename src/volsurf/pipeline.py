@@ -15,13 +15,16 @@ import pandas as pd
 
 from . import arbitrage as arb
 from .data import CleanConfig, clean_chain, dedupe_roots, load_snapshot
+from .essvi import ESSVIParams, essvi_d2w, essvi_dw, essvi_w, fit_essvi
+from .essvi import check_constraints as essvi_check_constraints
+from .essvi import wing_slopes as essvi_wing_slopes
 from .quotes import build_quotes
 from .ssvi import SSVIParams, check_constraints, fit_ssvi, ssvi_d2w, ssvi_dw, ssvi_w, wing_slopes
 from .svi import SVIParams, fit_svi, satisfies_constraints, svi_d2w, svi_dw, svi_w
 
 K_GRID = np.linspace(-2.5, 1.0, 3501)
-MODELS = ("svi", "ssvi", "ssvi_free")
-MODEL_LABELS = {"svi": "SVI", "ssvi": "SSVI", "ssvi_free": "SSVI (unconstrained)"}
+MODELS = ("svi", "ssvi", "ssvi_free", "essvi")
+MODEL_LABELS = {"svi": "SVI", "ssvi": "SSVI", "ssvi_free": "SSVI (unconstrained)", "essvi": "eSSVI"}
 # Snapshot REPORT.md is written from (the 2026-10-16 close). Later snapshots, such as the
 # live 2026-11-03 ones in docs/robustness.md, sort after it but are not the default view.
 BASELINE_SNAPSHOT = "20261017T212629Z"
@@ -71,7 +74,8 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
                          "constraints_ok": satisfies_constraints(p), "min_variance": p.min_variance(),
                          "left_wing_slope": p.wing_slopes()[0], "right_wing_slope": p.wing_slopes()[1]})
 
-    # 8. SSVI on the whole surface, with the no-arbitrage constraints and (diagnostic) without
+    # 8. SSVI on the whole surface, with the no-arbitrage constraints and (diagnostic) without;
+    #    then eSSVI (rho and psi per expiry), started from the constrained SSVI fit
     slices = [{"expiry": e, "T": T_of[e], "k": quotes.loc[quotes.expiry == e, "k"].values,
                "w": quotes.loc[quotes.expiry == e, "w_mid"].values,
                "weights": 1.0 / quotes.loc[quotes.expiry == e, "spread_w"].values} for e in expiries]
@@ -79,12 +83,17 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
     ssvi_cons = check_constraints(ssvi_p)
     free_p, free_info = fit_ssvi(slices, constrained=False)
     free_cons = check_constraints(free_p)
+    essvi_p, essvi_info = fit_essvi(slices, ssvi_start=ssvi_p)
+    essvi_cons = essvi_check_constraints(essvi_p)
 
     def slice_fn(model, e):
         """(w, w', w'') callables of k for one model and expiry."""
         if model == "svi":
             p = svi_params[e]
             return (lambda k: svi_w(k, p)), (lambda k: svi_dw(k, p)), (lambda k: svi_d2w(k, p))
+        if model == "essvi":
+            a = essvi_p.slice(expiries.index(e))
+            return (lambda k: essvi_w(k, *a)), (lambda k: essvi_dw(k, *a)), (lambda k: essvi_d2w(k, *a))
         sp = ssvi_p if model == "ssvi" else free_p
         a = (sp.thetas[expiries.index(e)], sp.rho, sp.eta, sp.gamma)
         return (lambda k: ssvi_w(k, *a)), (lambda k: ssvi_dw(k, *a)), (lambda k: ssvi_d2w(k, *a))
@@ -92,6 +101,8 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
     def right_slope(model, e):
         if model == "svi":
             return svi_params[e].wing_slopes()[1]
+        if model == "essvi":
+            return essvi_wing_slopes(*essvi_p.slice(expiries.index(e)))[1]
         sp = ssvi_p if model == "ssvi" else free_p
         return wing_slopes(sp.thetas[expiries.index(e)], sp.rho, sp.eta, sp.gamma)[1]
 
@@ -139,6 +150,8 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
             fitted[model]["calendar"][f"{e1}->{e2}"] = arb.calendar_report(
                 K_GRID, w1, w2, k_data=np.array([lo, hi]))
 
+    n = len(expiries)
+    n_params = {"svi": 5 * n, "ssvi": 3 + n, "ssvi_free": 3 + n, "essvi": 3 * n}
     comparison = []
     for model in MODELS:
         allrow = fit_stats[(fit_stats.model == model) & (fit_stats.expiry == "ALL")].iloc[0]
@@ -154,7 +167,7 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
             "butterfly_slices_arbitrage": sum(r["arbitrage"] for r in bf),
             "calendar_pairs_crossing": sum(r["crossing"] for r in cal),
             "calendar_pairs_crossing_in_data": sum(r["crossing_in_data_range"] for r in cal),
-            "n_params": 5 * len(expiries) if model == "svi" else 3 + len(expiries),
+            "n_params": n_params[model],
         })
     comparison = pd.DataFrame(comparison)
 
@@ -171,6 +184,8 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
         {**ssvi_p.to_dict(), "fit": ssvi_info, "constraints": ssvi_cons}, indent=2))
     (out / "ssvi_unconstrained_params.json").write_text(json.dumps(
         {**free_p.to_dict(), "fit": free_info, "constraints": free_cons}, indent=2))
+    (out / "essvi_params.json").write_text(json.dumps(
+        {**essvi_p.to_dict(), "fit": essvi_info, "constraints": essvi_cons}, indent=2))
     fit_stats.to_csv(out / "fit_stats.csv", index=False)
     curves.to_parquet(out / "curves.parquet", index=False)
     (out / "fitted_arbitrage.json").write_text(json.dumps(fitted, indent=2))
@@ -189,6 +204,7 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
         "raw_full_chain_survive_bid_ask": int(raw_full["survives_bid_ask"].sum()) if len(raw_full) else 0,
         "ssvi_constraints_ok": ssvi_cons["all_ok"],
         "ssvi_unconstrained_constraints_ok": free_cons["all_ok"],
+        "essvi_constraints_ok": essvi_cons["all_ok"],
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2))
     return out
@@ -202,6 +218,9 @@ def load_results(path: str | Path) -> dict:
     path = Path(path)
     ssvi = json.loads((path / "ssvi_params.json").read_text())
     svi_df = pd.read_csv(path / "svi_params.csv")
+    # results written before eSSVI was added have no essvi_params.json
+    essvi_path = path / "essvi_params.json"
+    essvi = json.loads(essvi_path.read_text()) if essvi_path.exists() else None
     return {
         "summary": json.loads((path / "summary.json").read_text()),
         "quotes": pd.read_parquet(path / "quotes.parquet"),
@@ -215,6 +234,8 @@ def load_results(path: str | Path) -> dict:
         "ssvi": SSVIParams.from_dict(ssvi),
         "ssvi_meta": ssvi,
         "ssvi_free": SSVIParams.from_dict(json.loads((path / "ssvi_unconstrained_params.json").read_text())),
+        "essvi": ESSVIParams.from_dict(essvi) if essvi else None,
+        "essvi_meta": essvi,
         "fit_stats": pd.read_csv(path / "fit_stats.csv"),
         "curves": pd.read_parquet(path / "curves.parquet"),
         "fitted_arbitrage": json.loads((path / "fitted_arbitrage.json").read_text()),
