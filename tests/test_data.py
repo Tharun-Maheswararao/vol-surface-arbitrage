@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from volsurf.data import (
+    CleanConfig,
     clean_chain,
     dedupe_roots,
     estimate_quote_time,
@@ -54,6 +55,18 @@ def test_clean_chain_reasons_add_up():
     assert counts == {"input_rows": 5, "zero_bid": 1, "crossed_or_locked": 1, "wide_spread": 1,
                       "deep_itm": 2, "kept": 0}
     assert out.empty
+
+
+def test_open_interest_filter_is_off_by_default():
+    df = pd.DataFrame({
+        "type": ["call", "call", "call"], "strike": [100.0, 105.0, 110.0],
+        "bid": [2.0, 1.0, 0.5], "ask": [2.2, 1.1, 0.6], "openInterest": [0, 5, None],
+    })
+    out, counts = clean_chain(df, spot=100.0)
+    assert len(out) == 3 and "low_open_interest" not in counts
+    out, counts = clean_chain(df, spot=100.0, cfg=CleanConfig(min_open_interest=1))
+    assert list(out["strike"]) == [105.0]  # zero and missing open interest both dropped
+    assert counts["low_open_interest"] == 2 and counts["kept"] == 1
 
 
 def test_dedupe_keeps_one_series_per_expiry():

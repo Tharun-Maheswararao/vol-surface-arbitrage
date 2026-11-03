@@ -256,6 +256,54 @@ not of the rate curve. Two other explanations do not hold:
 Conclusion: the 2-week rate is not identified by parity on this feed. It is harmless for
 the surface, but it should not be read as a market rate.
 
+## 5. Which bid/ask survivors are tradable?
+
+`raw_arbitrage` now labels every violation that survives bid/ask (column
+`survivor_class` in `raw_violations.csv`, counts in `summary.json` under
+`raw_survivor_classes`). The first rule that applies wins:
+
+* `zero_oi`: some leg has open interest 0, so no one holds it;
+* `sub_tick`: the executable profit per leg is at or below one quote tick (0.05 below $3,
+  0.10 from $3 up, using the coarsest tick among the legs and the quoted option's mid),
+  so one tick of slippage per leg erases it;
+* `candidate`: everything else.
+
+All five snapshots were rerun with the default `CleanConfig` into a scratch results root.
+Every `raw_violations.csv` matches the committed one column for column apart from the
+new label. A second scratch run used the new `CleanConfig(min_open_interest=1)` (off by
+default; `volsurf run --min-open-interest 1`), which drops zero-OI quotes before the
+checks.
+
+| Snapshot | Survive bid/ask | `zero_oi` | `sub_tick` | `candidate` | Survivors with `min_open_interest=1` |
+|---|---:|---:|---:|---:|---:|
+| `20261017T212354Z` (weekend) | 6 | 6 | 0 | 0 | 0 |
+| `20261017T212629Z` (weekend baseline) | 6 | 6 | 0 | 0 | 0 |
+| `20261103T153057Z` (10:30 ET) | 32 | 22 | 4 | 6 | 10 |
+| `20261103T174519Z` (12:45 ET) | 27 | 21 | 1 | 5 | 6 |
+| `20261103T202430Z` (15:24 ET) | 34 | 23 | 6 | 5 | 11 |
+
+With the OI filter on, the survivors are exactly the `sub_tick` and `candidate` rows of
+the default run. Removing the zero-OI strikes creates no new survivors among the
+neighbouring strikes they leave behind.
+
+**Recurrence across the three live snapshots** (same expiry, check and strikes): the 16
+candidates are 10 distinct structures. **3 recur in all three runs and the other 7
+appear only once.** None appears in exactly two runs.
+
+* The 3 recurring candidates are the "inverted OI-18 put" structures from section 1, all
+  on 2028-06-16: slope bound 6550/6575 and butterflies 6525/6550/6575 and
+  6575/6600/6625, worth $110–$270 per contract. They share the 6575 put. Its quote is
+  frozen at 253.0 / 261.6 in all three runs while the 6550 and 6600 puts move by 2–3
+  points, and it last traded on 2026-07-30. That is a stale quote, not an arbitrage.
+* The 7 one-off candidates are 2026-11-17 SPXW butterflies on 5- and 10-point strikes,
+  worth $35–$78 per contract (OI 6–47). None repeats, consistent with unsynchronised
+  delayed quotes.
+
+So no survivor in any snapshot looks like real, repeatable arbitrage. Limitation: a
+calendar's long-dated leg is interpolated, not a listed quote, so the classifier takes
+the short-dated leg's open interest and tick for both legs. No calendar survives bid/ask
+in any snapshot, so this does not affect the table.
+
 ## Proposed changes to REPORT.md
 
 All nine were applied to REPORT.md: items 1–7 on 2026-10-17, and item 5's

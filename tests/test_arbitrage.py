@@ -5,9 +5,13 @@ import pytest
 from volsurf.arbitrage import (
     calendar_checks,
     calendar_report,
+    classify_survivors,
     otm_call_curve,
+    quote_tick,
+    raw_arbitrage,
     strike_checks,
     summarize_raw,
+    survivor_class_counts,
 )
 from volsurf.pricing import black_price
 
@@ -133,3 +137,63 @@ def test_butterfly_report_flags_wing_beyond_lee_bound():
     assert butterfly_report(k, g, right_slope=1.5)["arbitrage"] is False
     rep = butterfly_report(k, g, right_slope=2.0)
     assert rep["wing_ok"] is False and rep["arbitrage"] is True
+
+
+def _viol(check, strikes, profit, expiry="E"):
+    return {"expiry": expiry, "check": check, "strikes": strikes, "exec_profit": profit,
+            "survives_bid_ask": profit > 0}
+
+
+def _legs(mids, ois, expiry="E"):
+    return pd.DataFrame({"expiry": expiry, "strike": [float(k) for k in mids],
+                         "mid": list(mids.values()), "openInterest": ois})
+
+
+def test_quote_tick_switches_at_three_dollars():
+    np.testing.assert_allclose(quote_tick([0.5, 2.99, 3.0, 40.0]), [0.05, 0.05, 0.10, 0.10])
+
+
+def test_classify_survivors():
+    quotes = _legs({90: 1.0, 95: 2.0, 100: 4.0, 105: 2.5}, [10, 0, 50, 20])
+    viol = pd.DataFrame([
+        _viol("vertical", "90/95", 5.0),             # 95 has no open interest
+        _viol("butterfly", "95/100/105", 5.0),       # zero OI wins over size
+        _viol("vertical", "90/105", 0.10),           # 0.05 per leg, ticks 0.05: at the tick
+        _viol("vertical", "90/105", 0.11),           # 0.055 per leg: above the tick
+        _viol("butterfly", "90/100/105", 0.30),      # 0.10 per leg, coarsest tick 0.10
+        _viol("butterfly", "90/100/105", 0.31),
+        _viol("slope_bound", "90/100", -0.20),       # mid-only violation: not a survivor
+        _viol("calendar", "105", 0.10),              # two legs, 0.05 each
+    ])
+    got = list(classify_survivors(viol, quotes))
+    assert got == ["zero_oi", "zero_oi", "sub_tick", "candidate", "sub_tick", "candidate",
+                   None, "sub_tick"]
+    viol["survivor_class"] = got
+    assert survivor_class_counts(viol) == {"zero_oi": 2, "sub_tick": 3, "candidate": 2}
+
+
+def test_classify_survivors_without_open_interest_or_with_missing_oi():
+    quotes = _legs({90: 1.0, 95: 2.0}, [np.nan, 5])
+    viol = pd.DataFrame([_viol("vertical", "90/95", 1.0)])
+    assert list(classify_survivors(viol, quotes)) == ["candidate"]  # NaN OI is not zero
+    assert list(classify_survivors(viol, quotes.drop(columns="openInterest"))) == ["candidate"]
+
+
+def test_raw_arbitrage_classifies_survivors_on_quoted_prices():
+    # Calls 4.0 / 3.3 / 2.2: the 100 call sits 0.2 above the chord, 0.1 at bid/ask.
+    # Profit per leg 0.1/3 is below the 0.10 tick of the $3-and-up legs -> sub_tick.
+    q = pd.DataFrame({"expiry": "E", "type": "call", "strike": [95.0, 100.0, 105.0],
+                      "bid": [3.95, 3.25, 2.15], "ask": [4.05, 3.35, 2.25], "F": 90.0, "D": 1.0,
+                      "T": 0.1, "k": np.log(np.array([95.0, 100.0, 105.0]) / 90.0),
+                      "openInterest": [100, 100, 100]})
+    q["mid"] = 0.5 * (q["bid"] + q["ask"])
+    v = raw_arbitrage(q)
+    bf = v[v["check"] == "butterfly"].iloc[0]
+    assert bf["exec_profit"] == pytest.approx(0.10) and bf["survivor_class"] == "sub_tick"
+    q.loc[1, ["bid", "ask"]] = [3.85, 3.95]  # 0.70 at bid/ask: 0.23 per leg
+    v = raw_arbitrage(q)
+    assert v.loc[v["check"] == "butterfly", "survivor_class"].iloc[0] == "candidate"
+    q.loc[2, "openInterest"] = 0
+    v = raw_arbitrage(q)
+    assert v.loc[v["check"] == "butterfly", "survivor_class"].iloc[0] == "zero_oi"
+    assert v.loc[~v["survives_bid_ask"], "survivor_class"].isna().all()
