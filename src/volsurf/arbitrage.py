@@ -147,7 +147,55 @@ def raw_arbitrage(quotes: pd.DataFrame) -> pd.DataFrame:
             min(oi.get((e, float(k)), np.nan) for k in ks.split("/"))
             for e, ks in zip(out["expiry"], out["strikes"])
         ]
+    out["survivor_class"] = classify_survivors(out, quotes)
     return out
+
+
+SURVIVOR_CLASSES = ("zero_oi", "sub_tick", "candidate")
+
+
+def quote_tick(price):
+    """SPX/SPXW minimum price increment: 0.05 below $3, 0.10 from $3 up."""
+    return np.where(np.asarray(price, float) < 3.0, 0.05, 0.10)
+
+
+def classify_survivors(viol: pd.DataFrame, quotes: pd.DataFrame) -> pd.Series:
+    """Label each violation that survives bid/ask; the others get None.
+
+    * ``zero_oi``: some leg has open interest 0, so nobody holds it;
+    * ``sub_tick``: the executable profit per leg is at or below one quote tick
+      (the coarsest tick among the legs), so one tick of slippage per leg erases it;
+    * ``candidate``: everything else.
+
+    Legs are found in ``quotes`` by (expiry, strike) and priced at the quoted
+    option's mid, not the parity-converted call. A calendar has two legs, but only
+    the short-dated one is a listed quote; its open interest and tick stand for both.
+    """
+    mid = dict(zip(zip(quotes["expiry"], quotes["strike"]), quotes["mid"]))
+    oi = (dict(zip(zip(quotes["expiry"], quotes["strike"]), quotes["openInterest"]))
+          if "openInterest" in quotes.columns else {})
+    labels = []
+    for e, check, ks, profit, surv in zip(viol["expiry"], viol["check"], viol["strikes"],
+                                          viol["exec_profit"], viol["survives_bid_ask"]):
+        if not surv:
+            labels.append(None)
+            continue
+        legs = [(e, float(k)) for k in str(ks).split("/")]
+        n_legs = 2 if check == "calendar" else len(legs)
+        tick = quote_tick([mid.get(leg, np.nan) for leg in legs]).max()
+        if any(oi.get(leg) == 0 for leg in legs):
+            labels.append("zero_oi")
+        elif profit / n_legs <= tick + TOL:
+            labels.append("sub_tick")
+        else:
+            labels.append("candidate")
+    return pd.Series(labels, index=viol.index, dtype=object)
+
+
+def survivor_class_counts(viol: pd.DataFrame) -> dict:
+    """Number of bid/ask survivors in each class."""
+    col = viol["survivor_class"] if "survivor_class" in viol.columns else pd.Series(dtype=object)
+    return {c: int((col == c).sum()) for c in SURVIVOR_CLASSES}
 
 
 def raw_arbitrage_full_chain(clean_chain: pd.DataFrame, forwards: pd.DataFrame) -> pd.DataFrame:

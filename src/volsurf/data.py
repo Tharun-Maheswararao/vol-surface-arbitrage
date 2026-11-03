@@ -189,6 +189,7 @@ class CleanConfig:
     max_rel_spread: float = 0.5      # (ask - bid) / mid
     deep_itm_moneyness: float = 0.10  # drop options more than 10% in the money vs spot
     min_bid: float = 0.0             # strictly greater than this
+    min_open_interest: int | None = None  # drop quotes with less open interest; None = off
 
 
 def option_root(symbol: str) -> str:
@@ -228,9 +229,15 @@ def clean_chain(chain: pd.DataFrame, spot: float, cfg: CleanConfig = CleanConfig
     itm = np.where(df["type"] == "call", spot / df["strike"] - 1.0, df["strike"] / spot - 1.0)
     deep = (reasons == "") & (itm > cfg.deep_itm_moneyness)
     reasons[deep] = "deep_itm"
+    checked = ["zero_bid", "crossed_or_locked", "wide_spread", "deep_itm"]
+    if cfg.min_open_interest is not None:
+        # missing open interest counts as below the threshold
+        low_oi = (reasons == "") & ~(df["openInterest"] >= cfg.min_open_interest)
+        reasons[low_oi] = "low_open_interest"
+        checked.append("low_open_interest")
 
     counts = {"input_rows": int(len(df))}
-    for r in ("zero_bid", "crossed_or_locked", "wide_spread", "deep_itm"):
+    for r in checked:
         counts[r] = int((reasons == r).sum())
     out = df[reasons == ""].reset_index(drop=True)
     counts["kept"] = int(len(out))

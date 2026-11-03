@@ -22,6 +22,6 @@ def test_figures_defaults_to_baseline(monkeypatch, tmp_path):
 def test_run_defaults_to_latest_snapshot(monkeypatch, tmp_path):
     seen = []
     monkeypatch.setattr(cli, "list_snapshots", lambda root: [Path("old"), Path("new")])
-    monkeypatch.setattr(cli, "run_pipeline", lambda snap, root: seen.append(snap) or snap)
+    monkeypatch.setattr(cli, "run_pipeline", lambda snap, root, *args: seen.append(snap) or snap)
     cli.main(["run", "--results-root", str(tmp_path)])
     assert seen == [Path("new")]

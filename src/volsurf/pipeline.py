@@ -7,6 +7,7 @@ module writes to ``results/<snapshot_id>/``; nothing downstream refits.
 from __future__ import annotations
 
 import json
+from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
@@ -179,9 +180,11 @@ def run_pipeline(snapshot_dir: str | Path, results_root: str | Path = "results",
         "fetch_time_utc": meta["fetch_time_utc"], "quote_time_utc": meta["quote_time_utc"],
         "quote_delay_note": meta["quote_delay_note"], "spot": meta["spot"],
         "n_expiries": len(expiries), "expiries": expiries, "n_quotes": int(len(quotes)),
+        "clean_config": asdict(clean_cfg),
         "clean_drop_counts": drop_counts,
         "raw_mid_violations": int(len(raw)),
         "raw_survive_bid_ask": int(raw["survives_bid_ask"].sum()) if len(raw) else 0,
+        "raw_survivor_classes": arb.survivor_class_counts(raw),
         "raw_full_chain_mid_violations": int(len(raw_full)),
         "raw_full_chain_survive_bid_ask": int(raw_full["survives_bid_ask"].sum()) if len(raw_full) else 0,
         "ssvi_constraints_ok": ssvi_cons["all_ok"],

@@ -11,7 +11,7 @@ import argparse
 import os
 from pathlib import Path
 
-from .data import collect_snapshot, list_snapshots
+from .data import CleanConfig, collect_snapshot, list_snapshots
 from .pipeline import BASELINE_SNAPSHOT, run_pipeline
 
 
@@ -25,6 +25,8 @@ def main(argv=None):
     r.add_argument("snapshot", nargs="?")
     r.add_argument("--raw-root", default="data/raw")
     r.add_argument("--results-root", default="results")
+    r.add_argument("--min-open-interest", type=int, default=None,
+                   help="drop quotes with less open interest (default: off)")
     f = sub.add_parser("figures", help="write static figures for a result")
     f.add_argument("result", nargs="?")
     f.add_argument("--results-root", default="results")
@@ -34,7 +36,8 @@ def main(argv=None):
         print(collect_snapshot(a.ticker, a.raw_root))
     elif a.cmd == "run":
         snap = Path(a.snapshot) if a.snapshot else list_snapshots(a.raw_root)[-1]
-        print(run_pipeline(snap, a.results_root))
+        cfg = CleanConfig(min_open_interest=a.min_open_interest)
+        print(run_pipeline(snap, a.results_root, cfg))
     elif a.cmd == "figures":
         os.environ.setdefault("MPLBACKEND", "Agg")
         from .plotting import save_all_figures
