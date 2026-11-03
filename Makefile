@@ -1,4 +1,7 @@
 PY ?= .venv/bin/python
+# The snapshot REPORT.md is built from; `run` alone uses the newest raw snapshot.
+BASELINE = $(shell $(PY) -c "from volsurf.pipeline import BASELINE_SNAPSHOT; print(BASELINE_SNAPSHOT)")
+SNAPSHOT ?=
 
 .PHONY: install collect run figures test lint app notebook all
 
@@ -9,7 +12,7 @@ collect:
 	$(PY) -m volsurf collect
 
 run:
-	$(PY) -m volsurf run
+	$(PY) -m volsurf run $(SNAPSHOT)
 
 figures:
 	$(PY) -m volsurf figures
@@ -26,4 +29,5 @@ app:
 notebook:
 	$(PY) -m jupyter nbconvert --to notebook --execute --inplace notebooks/analysis.ipynb
 
+all: SNAPSHOT = data/raw/$(BASELINE)
 all: run figures notebook

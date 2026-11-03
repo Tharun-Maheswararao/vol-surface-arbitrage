@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from volsurf.pipeline import list_results, load_results
+from volsurf.pipeline import BASELINE_SNAPSHOT, list_results, load_results
 from volsurf.plotting import LABELS, plotly_g, plotly_smile, plotly_surface
 
 ROOT = Path(__file__).resolve().parents[1] / "results"
@@ -28,7 +28,9 @@ def _load(path: str):
 
 
 with st.sidebar:
-    snap = st.selectbox("Snapshot", [p.name for p in runs][::-1])
+    names = [p.name for p in runs][::-1]
+    snap = st.selectbox("Snapshot", names,
+                        index=names.index(BASELINE_SNAPSHOT) if BASELINE_SNAPSHOT in names else 0)
     res = _load(str(ROOT / snap))
     s = res["summary"]
     expiries = list(res["forwards"].sort_values("T")["expiry"])

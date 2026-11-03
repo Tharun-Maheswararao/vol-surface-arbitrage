@@ -2,7 +2,7 @@
 
     python -m volsurf collect            # save a new raw snapshot
     python -m volsurf run [SNAPSHOT]     # run the pipeline (default: latest snapshot)
-    python -m volsurf figures [RESULT]   # write report figures (default: latest result)
+    python -m volsurf figures [RESULT]   # write report figures (default: the report's baseline)
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import os
 from pathlib import Path
 
 from .data import collect_snapshot, list_snapshots
-from .pipeline import list_results, run_pipeline
+from .pipeline import BASELINE_SNAPSHOT, run_pipeline
 
 
 def main(argv=None):
@@ -38,7 +38,7 @@ def main(argv=None):
     elif a.cmd == "figures":
         os.environ.setdefault("MPLBACKEND", "Agg")
         from .plotting import save_all_figures
-        res = Path(a.result) if a.result else list_results(a.results_root)[-1]
+        res = Path(a.result) if a.result else Path(a.results_root) / BASELINE_SNAPSHOT
         for p in save_all_figures(res):
             print(p)
 

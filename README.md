@@ -58,8 +58,12 @@ make app
 ```
 
 * `make collect` saves a new snapshot to `data/raw/<UTC time>/`. Raw snapshots are never overwritten.
-* `make run` fits the latest snapshot and writes everything to `results/<snapshot>/`.
-* `make figures` writes the PNG figures to `results/<snapshot>/figures/`.
+* `make run` fits the latest snapshot (or `make run SNAPSHOT=data/raw/<id>`) and writes
+  everything to `results/<snapshot>/`.
+* `make figures` writes the PNG figures to `results/<snapshot>/figures/` for the report's
+  baseline snapshot, `BASELINE_SNAPSHOT` in `src/volsurf/pipeline.py`. The notebook and the
+  app also open on the baseline; the app can switch to any other snapshot.
+* `make all` reruns the baseline end to end: `run`, `figures` and `notebook`.
 * `make app` opens the Streamlit viewer. It only reads saved results.
 
 Run the tests with `make test`, and re-execute the notebook with `make notebook`.
