@@ -3,6 +3,7 @@ from pathlib import Path
 import volsurf.__main__ as cli
 import volsurf.plotting
 from volsurf.pipeline import BASELINE_SNAPSHOT, default_results_root, list_results
+from volsurf.quotes import ForwardConfig
 
 
 def test_baseline_is_a_saved_result_but_not_the_newest():
@@ -25,3 +26,11 @@ def test_run_defaults_to_latest_snapshot(monkeypatch, tmp_path):
     monkeypatch.setattr(cli, "run_pipeline", lambda snap, root, *args: seen.append(snap) or snap)
     cli.main(["run", "--results-root", str(tmp_path)])
     assert seen == [Path("new")]
+
+
+def test_run_passes_forward_config(monkeypatch, tmp_path):
+    seen = []
+    monkeypatch.setattr(cli, "run_pipeline", lambda snap, root, cfg, fcfg: seen.append(fcfg) or snap)
+    cli.main(["run", "snap", "--results-root", str(tmp_path)])
+    cli.main(["run", "snap", "--results-root", str(tmp_path), "--fixed-d-max-t", "0.08", "--fixed-d-spxw"])
+    assert seen == [ForwardConfig(), ForwardConfig(fixed_d_max_T=0.08, fixed_d_spxw=True)]
