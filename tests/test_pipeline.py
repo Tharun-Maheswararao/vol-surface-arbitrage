@@ -52,6 +52,17 @@ def test_essvi_is_admissible_and_at_least_as_good_as_ssvi(results):
     assert comp.loc["eSSVI", "rmse_volpts"] <= comp.loc["SSVI", "rmse_volpts"] + 1e-6
 
 
+def test_svi_arbfree_is_arbitrage_free_and_fits(results):
+    res, _ = results
+    assert res["svi_arbfree_meta"]["constraints"]["all_ok"]
+    assert res["svi_arbfree_meta"]["fit"]["all_feasible"]
+    assert res["summary"]["svi_arbfree_constraints_ok"]
+    comp = res["comparison"].set_index("model")
+    assert comp.loc["SVI (arb-free)", "butterfly_slices_arbitrage"] == 0
+    assert comp.loc["SVI (arb-free)", "calendar_pairs_crossing"] == 0
+    assert comp.loc["SVI (arb-free)", "rmse_volpts"] < 0.05
+
+
 def test_default_results_root_from_subfolder(tmp_path, monkeypatch):
     from volsurf.pipeline import default_results_root
 

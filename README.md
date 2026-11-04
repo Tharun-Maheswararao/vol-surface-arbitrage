@@ -7,9 +7,11 @@ is rotated by dragging, then the Fit control switches between SVI, SSVI, eSSVI a
 three together.*
 
 This project builds an implied volatility surface from SPX option quotes and fits it
-three ways: SVI one expiry at a time, SSVI across the whole surface, and extended SSVI
-(eSSVI), which keeps SSVI's no-arbitrage guarantee but frees the skew per expiry. It then
-checks both the raw quotes and the fitted surfaces for static arbitrage. Every raw
+four ways. SVI fits one expiry at a time and SSVI the whole surface. Extended SSVI
+(eSSVI) keeps SSVI's no-arbitrage guarantee but frees the skew per expiry. Arbitrage-free
+SVI refits raw SVI slice by slice from an SSVI start, with penalties on calendar crossing
+and negative density, following Gatheral and Jacquier (2014) §5.2
+([docs/svi_arbfree.md](docs/svi_arbfree.md)). It then checks both the raw quotes and the fitted surfaces for static arbitrage. Every raw
 violation is checked twice, on mid prices and on executable bid/ask prices.
 
 **Headline.** The weekend column is the 2026-10-16 close (10 expiries, 2,308 OTM
@@ -107,7 +109,7 @@ REPORT.md         findings
 
 ## Tests
 
-`pytest` runs 144 tests in under 30 seconds, with no network access. CI
+`pytest` runs 155 tests in about 30 seconds, with no network access. CI
 (`.github/workflows/ci.yml`) follows the quant-signal-pipeline setup: on every push and
 pull request to `main` it installs the package and runs `pytest tests/ -v`. It also runs
 ruff, on Python 3.11, 3.12 and 3.13.
@@ -119,6 +121,7 @@ ruff, on Python 3.11, 3.12 and 3.13.
 | `test_svi.py` | Parameter recovery from noisy SVI data; constraints hold; density integrates to 1 and matches Breeden–Litzenberger; Vogt's arbitrage slice gets g < 0 |
 | `test_arbitrage.py` | Handmade price sets with known vertical, slope, uneven butterfly and calendar violations get flagged; clean sets pass; mid-only violations don't survive bid/ask |
 | `test_essvi.py` | Fitted eSSVI parameters satisfy the calendar and butterfly conditions; random admissible surfaces and their interpolated slices give g ≥ 0 and no crossing; the weaker calendar conditions alone are shown to allow a crossing |
+| `test_svi_arbfree.py` | Arbitrage-free SVI (GJ14 §5.2) recovers a known arbitrage-free, non-SSVI SVI surface; fits to crossing, negative-density slices come back with g ≥ 0 and no crossing on the fitting grid and the report grid; the Lemma 5.1 interpolation is calendar-monotone and convex in strike |
 | `test_cli.py` | Command-line defaults: latest snapshot for `run`, the report's baseline for `figures`, and the forward configuration |
 | `test_ssvi.py` | Recovery of known SSVI parameters; fitted parameters always satisfy the no-arbitrage conditions, even on data generated outside them; random admissible parameters give g ≥ 0 and no crossing |
 | `test_data.py` | Quote-time estimate, AM/PM settlement times, monthly/holiday expiry selection, cleaning counts, raw snapshots cannot be overwritten |

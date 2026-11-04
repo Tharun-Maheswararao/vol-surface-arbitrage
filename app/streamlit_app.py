@@ -36,19 +36,22 @@ with st.sidebar:
     expiries = list(res["forwards"].sort_values("T")["expiry"])
     expiry = st.selectbox("Expiry", expiries)
     has_essvi = res["essvi"] is not None  # results written before eSSVI was added have none
-    fits = ["All", "SVI", "SSVI"] + (["eSSVI"] if has_essvi else [])
+    has_arbfree = res["svi_arbfree"] is not None  # nor before arbitrage-free SVI was
+    fits = (["All", "SVI", "SSVI"] + (["eSSVI"] if has_essvi else [])
+            + (["SVI (arb-free)"] if has_arbfree else []))
     fit = st.radio("Fit", fits, horizontal=True)
     show_free = st.checkbox("Also show unconstrained SSVI", value=False)
     st.caption(f"Quotes as of {s['quote_time_utc']} (fetched {s['fetch_time_utc']}). "
                f"{s['quote_delay_note']}")
 
-models = {"All": ["svi", "ssvi"] + (["essvi"] if has_essvi else []),
-          "SVI": ["svi"], "SSVI": ["ssvi"], "eSSVI": ["essvi"]}[fit]
+models = {"All": (["svi", "ssvi"] + (["essvi"] if has_essvi else [])
+                  + (["svi_arbfree"] if has_arbfree else [])),
+          "SVI": ["svi"], "SSVI": ["ssvi"], "eSSVI": ["essvi"], "SVI (arb-free)": ["svi_arbfree"]}[fit]
 if show_free:
     models = models + ["ssvi_free"]
 
 comp = res["comparison"].set_index("model")
-rmse_models = ["SVI", "SSVI"] + (["eSSVI"] if has_essvi else [])
+rmse_models = ["SVI", "SSVI"] + (["eSSVI"] if has_essvi else []) + (["SVI (arb-free)"] if has_arbfree else [])
 # two rows, so the values are not cut off in a narrow window
 c1, c2 = st.columns(2)
 c1.metric("Expiries / quotes", f"{s['n_expiries']} / {s['n_quotes']}")
@@ -67,7 +70,8 @@ with tab_smile:
 with tab_surface:
     st.plotly_chart(plotly_surface(res, models), width="stretch")
     st.caption("Drag to rotate. SSVI interpolates theta linearly in T; eSSVI interpolates theta, "
-               "psi and rho*psi linearly in T; SVI interpolates total variance linearly in T at "
+               "psi and rho*psi linearly in T; arbitrage-free SVI mixes call prices between expiries "
+               "(Gatheral-Jacquier Lemma 5.1); SVI interpolates total variance linearly in T at "
                "fixed k between fitted expiries.")
 
 with tab_arb:
@@ -102,3 +106,6 @@ with tab_cmp:
     if has_essvi:
         st.caption("eSSVI no-arbitrage conditions")
         st.json(res["essvi_meta"]["constraints"])
+    if has_arbfree:
+        st.caption("Arbitrage-free SVI grid checks")
+        st.json(res["svi_arbfree_meta"]["constraints"])

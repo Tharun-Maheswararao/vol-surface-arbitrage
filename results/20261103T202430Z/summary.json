@@ -49,5 +49,6 @@
   "raw_full_chain_survive_bid_ask": 84,
   "ssvi_constraints_ok": true,
   "ssvi_unconstrained_constraints_ok": false,
-  "essvi_constraints_ok": true
+  "essvi_constraints_ok": true,
+  "svi_arbfree_constraints_ok": true
 }
