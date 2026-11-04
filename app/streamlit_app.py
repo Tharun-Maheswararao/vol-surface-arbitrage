@@ -58,13 +58,13 @@ cols[-1].metric("Raw violations: mid â†’ bid/ask", f"{s['raw_mid_violations']} â
 tab_smile, tab_surface, tab_arb, tab_cmp = st.tabs(["Smile", "Surface", "Arbitrage", "Model comparison"])
 
 with tab_smile:
-    st.plotly_chart(plotly_smile(res, expiry, models), use_container_width=True)
+    st.plotly_chart(plotly_smile(res, expiry, models), width="stretch")
     fs = res["fit_stats"]
     st.dataframe(fs[(fs.expiry == expiry) & fs.model.isin(models)].assign(
         model=lambda d: d.model.map(LABELS)).drop(columns=["expiry", "T"]), hide_index=True)
 
 with tab_surface:
-    st.plotly_chart(plotly_surface(res, models), use_container_width=True)
+    st.plotly_chart(plotly_surface(res, models), width="stretch")
     st.caption("Drag to rotate. SSVI interpolates theta linearly in T; eSSVI interpolates theta, "
                "psi and rho*psi linearly in T; SVI interpolates total variance linearly in T at "
                "fixed k between fitted expiries.")
@@ -82,7 +82,7 @@ with tab_arb:
             st.dataframe(res["raw_summary_full_chain"], hide_index=True)
     with right:
         st.subheader("Fitted surface")
-        st.plotly_chart(plotly_g(res, expiry, models), use_container_width=True)
+        st.plotly_chart(plotly_g(res, expiry, models), width="stretch")
         rows = []
         for m in models:
             b = res["fitted_arbitrage"][m]["butterfly"][expiry]
