@@ -35,23 +35,27 @@ with st.sidebar:
     s = res["summary"]
     expiries = list(res["forwards"].sort_values("T")["expiry"])
     expiry = st.selectbox("Expiry", expiries)
-    fit = st.radio("Fit", ["Both", "SVI", "SSVI"], horizontal=True)
+    has_essvi = res["essvi"] is not None  # results written before eSSVI was added have none
+    fits = ["All", "SVI", "SSVI"] + (["eSSVI"] if has_essvi else [])
+    fit = st.radio("Fit", fits, horizontal=True)
     show_free = st.checkbox("Also show unconstrained SSVI", value=False)
     st.caption(f"Quotes as of {s['quote_time_utc']} (fetched {s['fetch_time_utc']}). "
                f"{s['quote_delay_note']}")
 
-models = {"Both": ["svi", "ssvi"], "SVI": ["svi"], "SSVI": ["ssvi"]}[fit]
+models = {"All": ["svi", "ssvi"] + (["essvi"] if has_essvi else []),
+          "SVI": ["svi"], "SSVI": ["ssvi"], "eSSVI": ["essvi"]}[fit]
 if show_free:
     models = models + ["ssvi_free"]
 
-c1, c2, c3, c4 = st.columns(4)
 comp = res["comparison"].set_index("model")
-c1.metric("Expiries / quotes", f"{s['n_expiries']} / {s['n_quotes']}")
-c2.metric("SVI RMSE (vol pts)", f"{comp.loc['SVI', 'rmse_volpts']:.2f}")
-c3.metric("SSVI RMSE (vol pts)", f"{comp.loc['SSVI', 'rmse_volpts']:.2f}")
-c4.metric("Raw violations: mid → bid/ask", f"{s['raw_mid_violations']} → {s['raw_survive_bid_ask']}")
+rmse_models = ["SVI", "SSVI"] + (["eSSVI"] if has_essvi else [])
+cols = st.columns(len(rmse_models) + 2)
+cols[0].metric("Expiries / quotes", f"{s['n_expiries']} / {s['n_quotes']}")
+for c, m in zip(cols[1:], rmse_models):
+    c.metric(f"{m} RMSE (vol pts)", f"{comp.loc[m, 'rmse_volpts']:.2f}")
+cols[-1].metric("Raw violations: mid → bid/ask", f"{s['raw_mid_violations']} → {s['raw_survive_bid_ask']}")
 
-tab_smile, tab_surface, tab_arb, tab_cmp = st.tabs(["Smile", "Surface", "Arbitrage", "SVI vs SSVI"])
+tab_smile, tab_surface, tab_arb, tab_cmp = st.tabs(["Smile", "Surface", "Arbitrage", "Model comparison"])
 
 with tab_smile:
     st.plotly_chart(plotly_smile(res, expiry, models), use_container_width=True)
@@ -61,8 +65,9 @@ with tab_smile:
 
 with tab_surface:
     st.plotly_chart(plotly_surface(res, models), use_container_width=True)
-    st.caption("Drag to rotate. SSVI interpolates theta linearly in T; SVI interpolates total "
-               "variance linearly in T at fixed k between fitted expiries.")
+    st.caption("Drag to rotate. SSVI interpolates theta linearly in T; eSSVI interpolates theta, "
+               "psi and rho*psi linearly in T; SVI interpolates total variance linearly in T at "
+               "fixed k between fitted expiries.")
 
 with tab_arb:
     left, right = st.columns([1, 1])
@@ -91,4 +96,8 @@ with tab_arb:
 
 with tab_cmp:
     st.dataframe(res["comparison"], hide_index=True)
+    st.caption("SSVI no-arbitrage conditions")
     st.json(res["ssvi_meta"]["constraints"])
+    if has_essvi:
+        st.caption("eSSVI no-arbitrage conditions")
+        st.json(res["essvi_meta"]["constraints"])

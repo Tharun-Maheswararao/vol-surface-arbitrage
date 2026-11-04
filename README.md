@@ -3,7 +3,8 @@
 ![The Streamlit app: rotating the fitted surface and switching between SVI, SSVI and both](docs/app_demo.gif)
 
 *Recorded from the running Streamlit app (`make app`): the surface is rotated by dragging,
-then the Fit control switches between both fits, SVI alone and SSVI alone.*
+then the Fit control switches between both fits, SVI alone and SSVI alone. The recording
+predates eSSVI; the app's Fit control now also offers eSSVI, and "All" shows all three.*
 
 This project builds an implied volatility surface from SPX option quotes and fits it
 three ways: SVI one expiry at a time, SSVI across the whole surface, and extended SSVI
