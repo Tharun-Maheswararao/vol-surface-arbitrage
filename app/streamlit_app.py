@@ -49,11 +49,12 @@ if show_free:
 
 comp = res["comparison"].set_index("model")
 rmse_models = ["SVI", "SSVI"] + (["eSSVI"] if has_essvi else [])
-cols = st.columns(len(rmse_models) + 2)
-cols[0].metric("Expiries / quotes", f"{s['n_expiries']} / {s['n_quotes']}")
-for c, m in zip(cols[1:], rmse_models):
+# two rows, so the values are not cut off in a narrow window
+c1, c2 = st.columns(2)
+c1.metric("Expiries / quotes", f"{s['n_expiries']} / {s['n_quotes']}")
+c2.metric("Raw violations: mid → bid/ask", f"{s['raw_mid_violations']} → {s['raw_survive_bid_ask']}")
+for c, m in zip(st.columns(len(rmse_models)), rmse_models):
     c.metric(f"{m} RMSE (vol pts)", f"{comp.loc[m, 'rmse_volpts']:.2f}")
-cols[-1].metric("Raw violations: mid → bid/ask", f"{s['raw_mid_violations']} → {s['raw_survive_bid_ask']}")
 
 tab_smile, tab_surface, tab_arb, tab_cmp = st.tabs(["Smile", "Surface", "Arbitrage", "Model comparison"])
 
