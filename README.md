@@ -1,10 +1,10 @@
 # volsurf: SPX implied volatility surface and arbitrage detection
 
-![The Streamlit app: rotating the fitted surface and switching between SVI, SSVI, eSSVI and all three](docs/app_demo.gif)
+![The Streamlit app: rotating the fitted surface and switching between SVI, SSVI, eSSVI, arbitrage-free SVI and all four](docs/app_demo.gif)
 
 *Recorded from the running Streamlit app (`make app`) on the baseline snapshot: the surface
-is rotated by dragging, then the Fit control switches between SVI, SSVI, eSSVI and all
-three together.*
+is rotated by dragging, then the Fit control switches between SVI, SSVI, eSSVI,
+arbitrage-free SVI and all four together.*
 
 This project builds an implied volatility surface from SPX option quotes and fits it
 four ways. SVI fits one expiry at a time and SSVI the whole surface. Extended SSVI
