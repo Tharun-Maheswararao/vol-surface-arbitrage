@@ -211,6 +211,13 @@ def save_all_figures(result_dir, out_dir=None) -> list[Path]:
         "total_variance_svi.png": total_variance_figure(res, "svi"),
         "total_variance_ssvi.png": total_variance_figure(res, "ssvi"),
     }
+    if res["essvi"] is not None:  # results written before eSSVI was added have none
+        figs |= {
+            "smiles_with_essvi.png": smiles_figure(res, ("svi", "ssvi", "essvi")),
+            "essvi_surface.png": surface_figure(res, "essvi"),
+            "density_essvi.png": density_figure(res, "essvi"),
+            "total_variance_essvi.png": total_variance_figure(res, "essvi"),
+        }
     paths = []
     for name, fig in figs.items():
         p = out / name

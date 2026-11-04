@@ -2,14 +2,14 @@
   "svi": {
     "butterfly": {
       "2026-10-30": {
-        "min_g": 0.0010049640175082038,
+        "min_g": 0.0010489298092822667,
         "k_at_min_g": 0.19799999999999995,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.027557267978922752,
+        "right_wing_slope": 0.0275082161562525,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.06178270832467505,
+        "min_g_in_data_range": 0.06178384306523204,
         "negative_in_data_range": false
       },
       "2026-11-20": {
@@ -139,7 +139,7 @@
     },
     "calendar": {
       "2026-10-30->2026-11-20": {
-        "min_diff": 0.0006870076545700109,
+        "min_diff": 0.0006872793856705717,
         "k_at_min_diff": 0.06099999999999994,
         "crossing": false,
         "crossing_intervals": [],
@@ -236,175 +236,175 @@
   "ssvi": {
     "butterfly": {
       "2026-10-30": {
-        "min_g": 0.2521161494467888,
+        "min_g": 0.25211639057866797,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.006130894677859095,
+        "right_wing_slope": 0.0061313802770123745,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.2639822753923443,
+        "min_g_in_data_range": 0.2639839479294395,
         "negative_in_data_range": false
       },
       "2026-11-20": {
-        "min_g": 0.2531910557885634,
+        "min_g": 0.25319108869436685,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.009304869010837505,
+        "right_wing_slope": 0.009304628414381374,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.26917226176196596,
+        "min_g_in_data_range": 0.2691724179910347,
         "negative_in_data_range": false
       },
       "2026-12-18": {
-        "min_g": 0.2543178095735726,
+        "min_g": 0.2543178540808679,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.012658380093462028,
+        "right_wing_slope": 0.012658053002819369,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.2682148551784946,
+        "min_g_in_data_range": 0.2682150062788017,
         "negative_in_data_range": false
       },
       "2027-01-15": {
-        "min_g": 0.25505195040157447,
+        "min_g": 0.25505200231003805,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.01485080464402578,
+        "right_wing_slope": 0.014850420717969727,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.2669216063206749,
+        "min_g_in_data_range": 0.26692174933221957,
         "negative_in_data_range": false
       },
       "2027-02-19": {
-        "min_g": 0.25595897145623503,
+        "min_g": 0.25595903133026177,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.0175598452287101,
+        "right_wing_slope": 0.017559387826563633,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.26727382688218504,
+        "min_g_in_data_range": 0.26727396912191936,
         "negative_in_data_range": false
       },
       "2027-03-19": {
-        "min_g": 0.2568800925660664,
+        "min_g": 0.25688016215851595,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.020303022093402765,
+        "right_wing_slope": 0.02030249552389857,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.26727451503303495,
+        "min_g_in_data_range": 0.26727466006085937,
         "negative_in_data_range": false
       },
       "2027-06-17": {
-        "min_g": 0.2588046759879,
+        "min_g": 0.25880476299759664,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.025969356829069475,
+        "right_wing_slope": 0.025968680465197732,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.26482304873684914,
+        "min_g_in_data_range": 0.26482317812772493,
         "negative_in_data_range": false
       },
       "2027-09-17": {
-        "min_g": 0.2603794148978237,
+        "min_g": 0.2603795152028163,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.03049670877498007,
+        "right_wing_slope": 0.03049591194892257,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.2659723553735557,
+        "min_g_in_data_range": 0.265972492349429,
         "negative_in_data_range": false
       },
       "2027-12-17": {
-        "min_g": 0.26197365477038165,
+        "min_g": 0.261973769893833,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.03494116996346884,
+        "right_wing_slope": 0.03494026066411924,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.2649519042614872,
+        "min_g_in_data_range": 0.26495203872831813,
         "negative_in_data_range": false
       },
       "2028-06-16": {
-        "min_g": 0.2640829775631461,
+        "min_g": 0.26408310663672874,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.04056098873086396,
+        "right_wing_slope": 0.0405599255524628,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.29361000407785603,
+        "min_g_in_data_range": 0.2936102418902252,
         "negative_in_data_range": false
       }
     },
     "calendar": {
       "2026-10-30->2026-11-20": {
-        "min_diff": 0.0006361329444617661,
+        "min_diff": 0.0006360165540528019,
         "k_at_min_diff": 0.07699999999999996,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2026-11-20->2026-12-18": {
-        "min_diff": 0.0009562424372767694,
+        "min_diff": 0.0009562247364507221,
         "k_at_min_diff": 0.10899999999999999,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2026-12-18->2027-01-15": {
-        "min_diff": 0.0007833404073074391,
+        "min_diff": 0.0007833257984522224,
         "k_at_min_diff": 0.13600000000000012,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-01-15->2027-02-19": {
-        "min_diff": 0.001144468574094057,
+        "min_diff": 0.0011444457031405805,
         "k_at_min_diff": 0.16100000000000003,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-02-19->2027-03-19": {
-        "min_diff": 0.0013595554122073786,
+        "min_diff": 0.0013595307727097949,
         "k_at_min_diff": 0.18900000000000006,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-03-19->2027-06-17": {
-        "min_diff": 0.003467645710672258,
+        "min_diff": 0.0034675786777345965,
         "k_at_min_diff": 0.2330000000000001,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-06-17->2027-09-17": {
-        "min_diff": 0.0034176910893955192,
+        "min_diff": 0.0034176239700942496,
         "k_at_min_diff": 0.2869999999999999,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-09-17->2027-12-17": {
-        "min_diff": 0.0039379386535934036,
+        "min_diff": 0.003937866366995141,
         "k_at_min_diff": 0.3370000000000002,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-12-17->2028-06-16": {
-        "min_diff": 0.005846004723093788,
+        "min_diff": 0.005845884782312422,
         "k_at_min_diff": 0.395,
         "crossing": false,
         "crossing_intervals": [],
@@ -415,176 +415,355 @@
   "ssvi_free": {
     "butterfly": {
       "2026-10-30": {
-        "min_g": 0.12314800245048893,
+        "min_g": 0.1232342910129764,
         "k_at_min_g": -0.02400000000000002,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.01318486250513454,
+        "right_wing_slope": 0.013185518852482111,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.12314800245048893,
+        "min_g_in_data_range": 0.1232342910129764,
         "negative_in_data_range": false
       },
       "2026-11-20": {
-        "min_g": 0.19030676635912683,
+        "min_g": 0.1903354862900542,
         "k_at_min_g": -0.06099999999999994,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.019631701429485265,
+        "right_wing_slope": 0.01963071956002974,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.19030676635912683,
+        "min_g_in_data_range": 0.1903354862900542,
         "negative_in_data_range": false
       },
       "2026-12-18": {
-        "min_g": 0.22191332807893363,
+        "min_g": 0.2219256985517163,
         "k_at_min_g": -0.1339999999999999,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.026131524815654533,
+        "right_wing_slope": 0.0261303180678196,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.22191332807893363,
+        "min_g_in_data_range": 0.2219256985517163,
         "negative_in_data_range": false
       },
       "2027-01-15": {
-        "min_g": 0.2343286673745164,
-        "k_at_min_g": -0.22799999999999976,
+        "min_g": 0.2343348994181014,
+        "k_at_min_g": -0.2290000000000001,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.03075433613906317,
+        "right_wing_slope": 0.03075297907460468,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.2343286673745164,
+        "min_g_in_data_range": 0.2343348994181014,
         "negative_in_data_range": false
       },
       "2027-02-19": {
-        "min_g": 0.24183467614502543,
+        "min_g": 0.24183752056855606,
         "k_at_min_g": -0.3969999999999998,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.035316407311035705,
+        "right_wing_slope": 0.03531503546985864,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.24183467614502543,
+        "min_g_in_data_range": 0.24183752056855606,
         "negative_in_data_range": false
       },
       "2027-03-19": {
-        "min_g": 0.24555576833594236,
+        "min_g": 0.24555702256084688,
         "k_at_min_g": -0.6619999999999999,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.039042719996781564,
+        "right_wing_slope": 0.03904140849653843,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.24555576833594236,
+        "min_g_in_data_range": 0.24555702256084688,
         "negative_in_data_range": false
       },
       "2027-06-17": {
-        "min_g": 0.24899235864933997,
+        "min_g": 0.24899220657143722,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.04849666985272467,
+        "right_wing_slope": 0.04849543544999946,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.24963308818016963,
+        "min_g_in_data_range": 0.24963284957206583,
         "negative_in_data_range": false
       },
       "2027-09-17": {
-        "min_g": 0.2507925228990175,
+        "min_g": 0.2507918206276093,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.05598775334309723,
+        "right_wing_slope": 0.055986708956983135,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.252399712363995,
+        "min_g_in_data_range": 0.25239870748215015,
         "negative_in_data_range": false
       },
       "2027-12-17": {
-        "min_g": 0.25276315801375204,
+        "min_g": 0.25276185436856846,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.062397293616551545,
+        "right_wing_slope": 0.06239645182452962,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.25400564808630993,
+        "min_g_in_data_range": 0.25400409057012,
         "negative_in_data_range": false
       },
       "2028-06-16": {
-        "min_g": 0.2563606236343279,
+        "min_g": 0.25635833292886906,
         "k_at_min_g": -2.5,
         "negative": false,
         "negative_intervals": [],
-        "right_wing_slope": 0.0716465548111139,
+        "right_wing_slope": 0.07164631634204319,
         "wing_ok": true,
         "arbitrage": false,
-        "min_g_in_data_range": 0.27619202681167554,
+        "min_g_in_data_range": 0.2761862734658872,
         "negative_in_data_range": false
       }
     },
     "calendar": {
       "2026-10-30->2026-11-20": {
-        "min_diff": 0.0005204567995090315,
+        "min_diff": 0.0005204169787234067,
         "k_at_min_diff": 0.027000000000000135,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2026-11-20->2026-12-18": {
-        "min_diff": 0.0009252535178661031,
+        "min_diff": 0.0009252749720362536,
         "k_at_min_diff": 0.04700000000000015,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2026-12-18->2027-01-15": {
-        "min_diff": 0.0009540489490016835,
+        "min_diff": 0.0009540363343913741,
         "k_at_min_diff": 0.06800000000000006,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-01-15->2027-02-19": {
-        "min_diff": 0.0012221875587225045,
+        "min_diff": 0.001222177585773464,
         "k_at_min_diff": 0.08800000000000008,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-02-19->2027-03-19": {
-        "min_diff": 0.0012273356628579235,
+        "min_diff": 0.001227330706856362,
         "k_at_min_diff": 0.1080000000000001,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-03-19->2027-06-17": {
-        "min_diff": 0.0041825422627664085,
+        "min_diff": 0.004182394395092239,
         "k_at_min_diff": 0.14500000000000002,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-06-17->2027-09-17": {
-        "min_diff": 0.004538857185941032,
+        "min_diff": 0.004538665928615928,
         "k_at_min_diff": 0.19799999999999995,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-09-17->2027-12-17": {
-        "min_diff": 0.0048770361353780226,
+        "min_diff": 0.004876782333180677,
         "k_at_min_diff": 0.2490000000000001,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false
       },
       "2027-12-17->2028-06-16": {
-        "min_diff": 0.0089017571585777,
+        "min_diff": 0.008901476013673398,
         "k_at_min_diff": 0.31400000000000006,
+        "crossing": false,
+        "crossing_intervals": [],
+        "crossing_in_data_range": false
+      }
+    }
+  },
+  "essvi": {
+    "butterfly": {
+      "2026-10-30": {
+        "min_g": 0.24993979249177684,
+        "k_at_min_g": -2.5,
+        "negative": false,
+        "negative_intervals": [],
+        "right_wing_slope": 0.007157673175819715,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.2507185610512208,
+        "negative_in_data_range": false
+      },
+      "2026-11-20": {
+        "min_g": 0.24986385710136078,
+        "k_at_min_g": -2.5,
+        "negative": false,
+        "negative_intervals": [],
+        "right_wing_slope": 0.012600875489141666,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.25133763731531833,
+        "negative_in_data_range": false
+      },
+      "2026-12-18": {
+        "min_g": 0.2497453092081726,
+        "k_at_min_g": -2.5,
+        "negative": false,
+        "negative_intervals": [],
+        "right_wing_slope": 0.01737300142236907,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.2510618587484289,
+        "negative_in_data_range": false
+      },
+      "2027-01-15": {
+        "min_g": 0.2496465147399301,
+        "k_at_min_g": -2.5,
+        "negative": false,
+        "negative_intervals": [],
+        "right_wing_slope": 0.022545960028287265,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.25081859155801267,
+        "negative_in_data_range": false
+      },
+      "2027-02-19": {
+        "min_g": 0.24952275414919495,
+        "k_at_min_g": -2.5,
+        "negative": false,
+        "negative_intervals": [],
+        "right_wing_slope": 0.029147835052437936,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.25072229398546897,
+        "negative_in_data_range": false
+      },
+      "2027-03-19": {
+        "min_g": 0.24938266399624295,
+        "k_at_min_g": -2.5,
+        "negative": false,
+        "negative_intervals": [],
+        "right_wing_slope": 0.032188916529719114,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.25046831799138125,
+        "negative_in_data_range": false
+      },
+      "2027-06-17": {
+        "min_g": 0.24902021584737632,
+        "k_at_min_g": -2.5,
+        "negative": false,
+        "negative_intervals": [],
+        "right_wing_slope": 0.047557180471977434,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.24967717008561965,
+        "negative_in_data_range": false
+      },
+      "2027-09-17": {
+        "min_g": 0.25063714741861187,
+        "k_at_min_g": -2.5,
+        "negative": false,
+        "negative_intervals": [],
+        "right_wing_slope": 0.05422138824550188,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.25217475473052153,
+        "negative_in_data_range": false
+      },
+      "2027-12-17": {
+        "min_g": 0.2523995721689182,
+        "k_at_min_g": -2.5,
+        "negative": false,
+        "negative_intervals": [],
+        "right_wing_slope": 0.057885450940561314,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.25356817840917584,
+        "negative_in_data_range": false
+      },
+      "2028-06-16": {
+        "min_g": 0.2642330330693996,
+        "k_at_min_g": -2.5,
+        "negative": false,
+        "negative_intervals": [],
+        "right_wing_slope": 0.058748906959608986,
+        "wing_ok": true,
+        "arbitrage": false,
+        "min_g_in_data_range": 0.2951879195032158,
+        "negative_in_data_range": false
+      }
+    },
+    "calendar": {
+      "2026-10-30->2026-11-20": {
+        "min_diff": 0.0006505970299603479,
+        "k_at_min_diff": 0.04499999999999993,
+        "crossing": false,
+        "crossing_intervals": [],
+        "crossing_in_data_range": false
+      },
+      "2026-11-20->2026-12-18": {
+        "min_diff": 0.0008926702967986643,
+        "k_at_min_diff": 0.06899999999999995,
+        "crossing": false,
+        "crossing_intervals": [],
+        "crossing_in_data_range": false
+      },
+      "2026-12-18->2027-01-15": {
+        "min_diff": 0.001037865906221408,
+        "k_at_min_diff": 0.07299999999999995,
+        "crossing": false,
+        "crossing_intervals": [],
+        "crossing_in_data_range": false
+      },
+      "2027-01-15->2027-02-19": {
+        "min_diff": 0.0014976945254554994,
+        "k_at_min_diff": 0.07900000000000018,
+        "crossing": false,
+        "crossing_intervals": [],
+        "crossing_in_data_range": false
+      },
+      "2027-02-19->2027-03-19": {
+        "min_diff": 0.00105983281216663,
+        "k_at_min_diff": 0.12300000000000022,
+        "crossing": false,
+        "crossing_intervals": [],
+        "crossing_in_data_range": false
+      },
+      "2027-03-19->2027-06-17": {
+        "min_diff": 0.004792882922834575,
+        "k_at_min_diff": 0.10499999999999998,
+        "crossing": false,
+        "crossing_intervals": [],
+        "crossing_in_data_range": false
+      },
+      "2027-06-17->2027-09-17": {
+        "min_diff": 0.004188870158917068,
+        "k_at_min_diff": 0.20699999999999985,
+        "crossing": false,
+        "crossing_intervals": [],
+        "crossing_in_data_range": false
+      },
+      "2027-09-17->2027-12-17": {
+        "min_diff": 0.0036370872872858832,
+        "k_at_min_diff": 0.3120000000000003,
+        "crossing": false,
+        "crossing_intervals": [],
+        "crossing_in_data_range": false
+      },
+      "2027-12-17->2028-06-16": {
+        "min_diff": 0.005703728511317188,
+        "k_at_min_diff": 1.0,
         "crossing": false,
         "crossing_intervals": [],
         "crossing_in_data_range": false

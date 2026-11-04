@@ -293,9 +293,11 @@ expiry.
   `resid_std` falls. For example, 2026-11-20 at 15:24 falls from 0.68 to 0.38. A free
   slope had been absorbing part of the curvature in C − P.
 
-**Recommendation:** make `ForwardConfig(fixed_d_max_T=0.08, fixed_d_spxw=True)` the
+**Recommendation (now adopted):** make `ForwardConfig(fixed_d_max_T=0.08, fixed_d_spxw=True)` the
 default, in a separate change that regenerates `results/` and rewrites REPORT.md's
-forwards paragraph. The fits gain nothing measurable. The gain is a forwards table whose
+forwards paragraph. This is now the default, and all five `results/` directories were
+regenerated with it. `volsurf run --parity-d` restores the parity-only fit that every
+table above in this section, and sections 1–3, were computed with. The fits gain nothing measurable. The gain is a forwards table whose
 short-dated rates look like a rate curve and are labelled as borrowed, instead of 1.7%
 or 6.9% values that the text then has to explain away. It should not be turned on in
 SPXW-only form.

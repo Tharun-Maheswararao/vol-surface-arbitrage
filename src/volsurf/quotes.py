@@ -21,11 +21,16 @@ class ForwardConfig:
     A targeted expiry (T below ``fixed_d_max_T``, or any SPXW slice if
     ``fixed_d_spxw``) gets D log-linearly interpolated from the parity discount
     factors of the untargeted SPX expiries, with a flat rate outside them, and only
-    F is fitted. The default targets nothing, so every D comes from its own parity
-    regression.
+    F is fitted. The default targets expiries under 0.08 y and every SPXW slice, because
+    parity does not identify the short-dated rate on this feed (docs/robustness.md,
+    section 4). ``ForwardConfig.parity_only()`` takes every D from its own regression.
     """
-    fixed_d_max_T: float | None = None
-    fixed_d_spxw: bool = False
+    fixed_d_max_T: float | None = 0.08
+    fixed_d_spxw: bool = True
+
+    @classmethod
+    def parity_only(cls) -> "ForwardConfig":
+        return cls(fixed_d_max_T=None, fixed_d_spxw=False)
 
     def targets(self, root: str, T: float) -> bool:
         return ((self.fixed_d_max_T is not None and T < self.fixed_d_max_T)

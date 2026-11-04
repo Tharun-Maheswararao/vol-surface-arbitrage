@@ -20,6 +20,16 @@
     "2028-06-16"
   ],
   "n_quotes": 2093,
+  "clean_config": {
+    "max_rel_spread": 0.5,
+    "deep_itm_moneyness": 0.1,
+    "min_bid": 0.0,
+    "min_open_interest": null
+  },
+  "forward_config": {
+    "fixed_d_max_T": 0.08,
+    "fixed_d_spxw": true
+  },
   "clean_drop_counts": {
     "input_rows": 4138,
     "zero_bid": 225,
@@ -30,8 +40,14 @@
   },
   "raw_mid_violations": 674,
   "raw_survive_bid_ask": 34,
+  "raw_survivor_classes": {
+    "zero_oi": 23,
+    "sub_tick": 6,
+    "candidate": 5
+  },
   "raw_full_chain_mid_violations": 996,
   "raw_full_chain_survive_bid_ask": 84,
   "ssvi_constraints_ok": true,
-  "ssvi_unconstrained_constraints_ok": false
+  "ssvi_unconstrained_constraints_ok": false,
+  "essvi_constraints_ok": true
 }

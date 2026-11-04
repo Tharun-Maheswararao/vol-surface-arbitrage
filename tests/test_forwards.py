@@ -107,16 +107,21 @@ def _clean_synthetic(tmp_path):
     return clean, meta
 
 
-def test_forward_config_default_is_parity_everywhere(tmp_path):
+def test_forward_config_parity_only_is_parity_everywhere(tmp_path):
     clean, meta = _clean_synthetic(tmp_path)
-    _, fwd = build_quotes(clean, meta)
+    _, fwd = build_quotes(clean, meta, ForwardConfig.parity_only())
     assert (fwd["D_source"] == "parity").all()
+
+
+def test_forward_config_default_targets_short_and_spxw():
+    cfg = ForwardConfig()
+    assert cfg.targets("SPX", 0.05) and cfg.targets("SPXW", 0.5) and not cfg.targets("SPX", 0.1)
 
 
 def test_forward_config_fixes_short_expiries_from_spx_curve(tmp_path):
     clean, meta = _clean_synthetic(tmp_path)
-    q0, base = build_quotes(clean, meta)
-    q1, fwd = build_quotes(clean, meta, ForwardConfig(fixed_d_max_T=0.08))
+    q0, base = build_quotes(clean, meta, ForwardConfig.parity_only())
+    q1, fwd = build_quotes(clean, meta, ForwardConfig(fixed_d_max_T=0.08, fixed_d_spxw=False))
     short = fwd["T"] < 0.08
     assert short.sum() == 1
     assert (fwd.loc[short, "D_source"] == "spx_extrap").all()
@@ -131,8 +136,8 @@ def test_forward_config_fixes_short_expiries_from_spx_curve(tmp_path):
 
 
 def test_forward_config_spxw_flag_targets_only_spxw():
-    cfg = ForwardConfig(fixed_d_spxw=True)
+    cfg = ForwardConfig(fixed_d_max_T=None, fixed_d_spxw=True)
     assert cfg.targets("SPXW", 0.5) and not cfg.targets("SPX", 0.01)
-    cfg = ForwardConfig(fixed_d_max_T=0.08)
+    cfg = ForwardConfig(fixed_d_max_T=0.08, fixed_d_spxw=False)
     assert cfg.targets("SPX", 0.05) and not cfg.targets("SPXW", 0.1)
-    assert not ForwardConfig().targets("SPXW", 0.01)
+    assert not ForwardConfig.parity_only().targets("SPXW", 0.01)

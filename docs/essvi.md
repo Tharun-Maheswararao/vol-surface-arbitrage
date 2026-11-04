@@ -143,8 +143,9 @@ The results directory gains `essvi_params.json`, which holds θ, ρ, ψ per expi
 fit status and `check_constraints`. It also gains `w_essvi`, `g_essvi` and
 `density_essvi` columns in `curves.parquet`, `w_essvi` and `iv_essvi` in
 `quotes.parquet`, and an `eSSVI` row in `comparison.csv` and `fit_stats.csv`.
-`load_results` returns `essvi=None` for result directories written before this change,
-such as the committed `results/`.
+`load_results` returns `essvi=None` for result directories written before this change.
+All five committed `results/` directories have since been regenerated with eSSVI, under the
+fixed-D forward default, which moves these RMSEs by at most 0.0005 vol points.
 
 Runtime: the eSSVI fit takes 30 s to 5 min per snapshot on a laptop. It uses a
 finite-difference Jacobian over 30 parameters and five starts.

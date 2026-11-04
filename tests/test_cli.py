@@ -32,5 +32,8 @@ def test_run_passes_forward_config(monkeypatch, tmp_path):
     seen = []
     monkeypatch.setattr(cli, "run_pipeline", lambda snap, root, cfg, fcfg: seen.append(fcfg) or snap)
     cli.main(["run", "snap", "--results-root", str(tmp_path)])
-    cli.main(["run", "snap", "--results-root", str(tmp_path), "--fixed-d-max-t", "0.08", "--fixed-d-spxw"])
-    assert seen == [ForwardConfig(), ForwardConfig(fixed_d_max_T=0.08, fixed_d_spxw=True)]
+    cli.main(["run", "snap", "--results-root", str(tmp_path), "--parity-d"])
+    cli.main(["run", "snap", "--results-root", str(tmp_path), "--no-fixed-d-spxw"])
+    assert seen == [ForwardConfig(fixed_d_max_T=0.08, fixed_d_spxw=True),
+                    ForwardConfig.parity_only(),
+                    ForwardConfig(fixed_d_max_T=0.08, fixed_d_spxw=False)]
