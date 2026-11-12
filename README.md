@@ -129,7 +129,16 @@ ruff, on Python 3.11, 3.12 and 3.13.
 
 ## Data caveats
 
+The option quotes in `data/raw/` come from Yahoo Finance through the `yfinance` package.
+They are included only so the results can be reproduced, for research and educational
+use. Yahoo's terms of use apply to them, and the MIT licence below covers the code, not
+the quote data.
+
 Yahoo Finance quotes are delayed about 15 minutes and have no quote timestamps or
 sizes. Outside market hours they are the prior session's last quotes. "Survives bid
 and ask" therefore means "survives the displayed quotes". In-the-money quotes in the
 feed are often stale; see the diagnostic in the report.
+
+## Licence
+
+The code is released under the MIT licence; see [LICENSE](LICENSE).
